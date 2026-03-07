@@ -59,6 +59,18 @@ const theme = {
     large: '2rem',
     xlarge: '4rem',
   },
+
+    transitions: {
+    fast: '0.15s ease',
+    default: '0.3s ease',
+    slow: '0.5s ease',
+  },
+
+  shadows: {
+  small: '0 2px 4px rgba(0,0,0,0.1)',
+  medium: '0 4px 8px rgba(0,0,0,0.15)',
+  large: '0 8px 16px rgba(0,0,0,0.2)',
+  },
 };
 
 export default theme;
