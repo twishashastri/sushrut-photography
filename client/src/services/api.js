@@ -1,0 +1,28 @@
+import axios from 'axios';
+
+const API = axios.create({ 
+  baseURL: 'http://localhost:5000/api' 
+});
+
+API.interceptors.request.use((req) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    req.headers['x-auth-token'] = token;
+  }
+  return req;
+});
+
+export const fetchEvents = () => API.get('/events');
+export const createEvent = (data) => API.post('/events', data);
+export const deleteEvent = (id) => API.delete(`/events/${id}`);
+
+export const fetchPhotos = (event) => {
+  const params = event ? { event } : {};
+  return API.get('/photos', { params });
+};
+export const fetchPhotosByEvent = (event) => API.get(`/photos/event/${event}`);
+export const deletePhoto = (id) => API.delete(`/photos/${id}`);
+
+export const login = (data) => API.post('/auth/login', data);
+
+export default API;
