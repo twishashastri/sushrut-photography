@@ -19,6 +19,17 @@ router.get('/', async (req, res) => {
   }
 });
 
+router.get('/section/:section', async (req, res) => {
+  try {
+    const photos = await Photo.find({ 
+      section: req.params.section 
+    }).sort({ order: 1, createdAt: -1 });
+    res.json(photos);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // Get photos by event (public)
 router.get('/event/:event', async (req, res) => {
   try {
@@ -32,7 +43,6 @@ router.get('/event/:event', async (req, res) => {
 });
 
 // Delete photo (admin only)
-// Delete photo (admin only) - UPDATED to delete from Cloudinary too
 router.delete('/:id', auth, async (req, res) => {
   try {
     // First find the photo to get the Cloudinary URL
@@ -43,7 +53,6 @@ router.delete('/:id', auth, async (req, res) => {
     }
     
     // Extract Cloudinary public ID from the URL
-    // Cloudinary URL format: https://res.cloudinary.com/your-cloud/image/upload/v1234567890/folder/image.jpg
     const urlParts = photo.url.split('/');
     const filename = urlParts[urlParts.length - 1].split('.')[0];
     const folder = urlParts[urlParts.length - 2];
@@ -57,7 +66,6 @@ router.delete('/:id', auth, async (req, res) => {
       console.log('Cloudinary deletion result:', result);
     } catch (cloudinaryError) {
       console.error('Cloudinary deletion error:', cloudinaryError);
-      // Continue with database deletion even if Cloudinary fails
     }
     
     // Delete from MongoDB

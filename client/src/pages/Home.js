@@ -1,19 +1,43 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { fetchEvents, fetchPhotos } from '../services/api';
+import { motion } from "framer-motion";
+import { fetchEvents, fetchPhotosBySection } from '../services/api';
 
 function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [heroImages, setHeroImages] = useState([]);
   const [events, setEvents] = useState([]);
-  const [featuredPhotos, setFeaturedPhotos] = useState([]);
+  const [parallaxImage, setParallaxImage] = useState('');
   const [loading, setLoading] = useState(true);
+  const ref = useRef(null);
+  const [offset, setOffset] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!ref.current) return;
+      const rect = ref.current.getBoundingClientRect();
+      setOffset(rect.top);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
 
   useEffect(() => {
     loadData();
   }, []);
+
+  // Auto-rotate hero slideshow
+  useEffect(() => {
+    if (heroImages.length === 0) return;
+    const timer = setInterval(() => {
+      setCurrentSlide(prev => (prev + 1) % heroImages.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [heroImages]);
 
   const loadData = async () => {
     try {
@@ -21,11 +45,17 @@ function Home() {
       const eventsData = await fetchEvents();
       setEvents(eventsData.data);
       
-      const photosData = await fetchPhotos();
-      setHeroImages(photosData.data.slice(0, 5));
+      // Fetch hero images (section: "hero")
+      const heroData = await fetchPhotosBySection('hero');
+      if (heroData.data.length > 0) {
+        setHeroImages(heroData.data);
+      }
       
-      // Fetch featured photos
-      setFeaturedPhotos(photosData.data.slice(0, 8));
+      // Fetch homepage parallax image (section: "home-parallax")
+      const parallaxData = await fetchPhotosBySection('home-parallax');
+      if (parallaxData.data.length > 0) {
+        setParallaxImage(parallaxData.data[0].url);
+      }
       
     } catch (error) {
       console.error('Error loading data:', error);
@@ -33,16 +63,6 @@ function Home() {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (heroImages.length === 0) return;
-    
-    const timer = setInterval(() => {
-      setCurrentSlide(prev => (prev + 1) % heroImages.length);
-    }, 5000);
-    
-    return () => clearInterval(timer);
-  }, [heroImages]);
 
   if (loading) {
     return (
@@ -54,17 +74,30 @@ function Home() {
     );
   }
 
+
   return (
     <>
+    <motion.div
+    initial={{ opacity: 0, scale: 0.98 }}
+    animate={{ opacity: 1, scale: 1 }}
+    exit={{ opacity: 0, scale: 0.98 }}
+    transition={{ duration: 0.6, ease: "easeInOut" }}
+    >
       <Header />
       <main>
-        {/* Hero Section */}
+        {/* Hero Section - Slideshow from database */}
         <section className="hero">
-          {heroImages.map((img, index) => (
-            <div key={img._id || index} className={`hero-slide ${index === currentSlide ? 'active' : ''}`}>
-              <img src={img.url} alt={`Sushrut Shastri Photography - Edmonton Photographer`} />
+          {heroImages.length > 0 ? (
+            heroImages.map((img, index) => (
+              <div key={img._id} className={`hero-slide ${index === currentSlide ? 'active' : ''}`}>
+                <img src={img.url} alt={`Sushrut Shastri Photography - Edmonton`} />
+              </div>
+            ))
+          ) : (
+            <div className="hero-slide active">
+              <img src="https://via.placeholder.com/1920x1080?text=Upload+Photos" alt="Placeholder" />
             </div>
-          ))}
+          )}
           <div className="hero-overlay"></div>
           <div className="hero-content">
             <h1>Sushrut Shastri Photography</h1>
@@ -82,7 +115,7 @@ function Home() {
                 <p>Whether you're looking for a wedding photographer in Edmonton, need professional portraits, or want to capture your family's precious moments, Sushrut brings creativity and professionalism to every shoot. Serving clients across Alberta including Calgary, Red Deer, and throughout the Edmonton region.</p>
               </div>
               <div className="about-image">
-                <img src={heroImages[0]?.url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800'} alt="Sushrut Shastri - Edmonton Photographer" />
+                <img src={heroImages[0]?.url || 'https://via.placeholder.com/800x600?text=Upload+Photos'} alt="Sushrut Shastri - Edmonton Photographer" />
               </div>
             </div>
           </div>
@@ -95,7 +128,7 @@ function Home() {
             <div className="events-grid">
               {events.map(event => (
                 <Link key={event._id} to={`/gallery/${event.name.toLowerCase()}`} className="event-card">
-                  <img src={event.coverImage || heroImages[0]?.url} alt={`Edmonton ${event.name} Photography`} />
+                  <img src={event.coverImage || heroImages[0]?.url || 'https://via.placeholder.com/600x400?text=No+Image'} alt={`Edmonton ${event.name} Photography`} />
                   <div className="event-overlay">
                     <h3>{event.name} Photography</h3>
                     <p>{event.imageCount || 0} photos • Edmonton, AB</p>
@@ -106,21 +139,27 @@ function Home() {
           </div>
         </section>
 
-        {/* Photos Grid */}
-        <section className="featured-section" style={{ padding: 'var(--space-xl) 0', background: '#fff' }}>
-          <div className="container">
-            <h2 style={{ textAlign: 'center', marginBottom: 'var(--space-xl)' }}>Recent Work</h2>
-            <div className="gallery-grid">
-              {featuredPhotos.map(photo => (
-                <div key={photo._id} className="gallery-item">
-                  <img src={photo.url} alt={photo.event} />
-                </div>
-              ))}
-            </div>
+        {/* Parallax Section */}
+        <section className="parallax-section" ref={ref}>
+          {parallaxImage ? (
+            <div 
+              className="parallax-bg" 
+              style={{ 
+                backgroundImage: `url(${parallaxImage})`,
+                transform: `translateY(${offset * 0.15}px)`
+              }}
+            ></div>
+          ) : (
+            <div className="parallax-bg-placeholder"></div>
+          )}
+          <div className="parallax-content">
+            <h2>Your Story, Captured</h2>
+            <p>Wedding • Portrait • Commercial Photography in Edmonton & Alberta</p>
+            <Link to="/contact" className="parallax-btn">Let's Connect →</Link>
           </div>
         </section>
 
-        {/* SEO*/}
+        {/* SEO Section */}
         <section style={{ padding: '40px 0', background: '#f5f5f5' }}>
           <div className="container">
             <div style={{ textAlign: 'center', maxWidth: '800px', margin: '0 auto' }}>
@@ -133,6 +172,7 @@ function Home() {
         </section>
       </main>
       <Footer />
+      </motion.div>
     </>
   );
 }

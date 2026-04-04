@@ -20,6 +20,5 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-// NO PRE-SAVE HOOK - we'll hash in the route instead
 
 module.exports = mongoose.model('User', userSchema);

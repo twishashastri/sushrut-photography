@@ -6,8 +6,10 @@ function Header() {
 
   return (
     <header className="header">
-      <nav className="nav container">
-        <Link to="/" className="logo">Sushrut Shastri</Link>
+      <nav className="nav container"> 
+        <Link to="/" className="logo">
+          <img src="/Logo.png" alt="Sushrut Shastri Photography" className="logo-img" />
+        </Link>
         
         <div className="nav-links">
           <Link to="/">Home</Link>
@@ -25,7 +27,9 @@ function Header() {
         <button className="close-btn" onClick={() => setMenuOpen(false)}>✕</button>
         <div className="mobile-nav-links">
           <Link to="/" onClick={() => setMenuOpen(false)}>Home</Link>
-          <Link to="/gallery/wedding" onClick={() => setMenuOpen(false)}>Gallery</Link>
+          <Link to="/gallery" onClick={() => setMenuOpen(false)}>Gallery</Link>
+          <Link to="/events" onClick={() => setMenuOpen(false)}>Events</Link>
+          <Link to="/contact" onClick={() => setMenuOpen(false)}>Contact</Link>
         </div>
       </div>
     </header>

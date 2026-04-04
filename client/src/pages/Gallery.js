@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import Lightbox from '../components/Lightbox';
+import { motion } from "framer-motion";
 import { fetchPhotos } from '../services/api';
 
 function Gallery() {
   const [photos, setPhotos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   useEffect(() => {
     loadAllPhotos();
@@ -24,14 +25,27 @@ function Gallery() {
     }
   };
 
-  const openLightbox = (photo) => {
+  const openLightbox = (photo, index) => {
     setSelectedPhoto(photo);
+    setSelectedIndex(index);
     document.body.style.overflow = 'hidden';
   };
 
   const closeLightbox = () => {
     setSelectedPhoto(null);
     document.body.style.overflow = 'auto';
+  };
+
+  const nextPhoto = () => {
+    const nextIndex = (selectedIndex + 1) % photos.length;
+    setSelectedPhoto(photos[nextIndex]);
+    setSelectedIndex(nextIndex);
+  };
+
+  const prevPhoto = () => {
+    const prevIndex = (selectedIndex - 1 + photos.length) % photos.length;
+    setSelectedPhoto(photos[prevIndex]);
+    setSelectedIndex(prevIndex);
   };
 
   if (loading) {
@@ -46,46 +60,55 @@ function Gallery() {
 
   return (
     <>
+        <motion.div
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.98 }}
+        transition={{ duration: 0.6, ease: "easeInOut" }}
+        >
       <Header />
-      <div className="gallery-header">
-        <div className="container">
-          <h1>All Photography</h1>
-          <p>Edmonton, Alberta • {photos.length} beautiful moments</p>
+      <main className="gallery-page">
+        <div className="gallery-masonry">
+          {photos.map((photo, index) => (
+            <div 
+              key={photo._id} 
+              className="gallery-masonry-item"
+              onClick={() => openLightbox(photo, index)}
+            >
+              <img 
+                src={photo.url} 
+                alt="" 
+                loading="lazy"
+              />
+            </div>
+          ))}
         </div>
-      </div>
-      <main className="container">
-        {photos.length === 0 ? (
-          <div className="loading" style={{ textAlign: 'center', padding: '60px 0' }}>
-            <h3>No photos yet</h3>
-            <p>Check back soon!</p>
-          </div>
-        ) : (
-          <div className="gallery-grid">
-            {photos.map((photo) => (
-              <div 
-                key={photo._id} 
-                className="gallery-item"
-                onClick={() => openLightbox(photo)}
-              >
-                <img src={photo.url} alt={photo.event} />
-                <div className="gallery-item-info">
-                  <p>{photo.event} • Edmonton, AB</p>
-                  {photo.photographer && (
-                    <p style={{ fontSize: '12px', opacity: 0.8 }}>By {photo.photographer}</p>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
       </main>
       
-      {/* Lightbox for fullscreen view */}
       {selectedPhoto && (
-        <Lightbox photo={selectedPhoto} onClose={closeLightbox} />
+        <div className="lightbox-overlay" onClick={closeLightbox}>
+          <div className="lightbox-container" onClick={(e) => e.stopPropagation()}>
+            <button className="lightbox-close" onClick={closeLightbox}>×</button>
+            
+            {photos.length > 1 && (
+              <button className="lightbox-prev" onClick={prevPhoto}>‹</button>
+            )}
+            
+            <img 
+              src={selectedPhoto.url} 
+              alt="" 
+              className="lightbox-image" 
+            />
+            
+            {photos.length > 1 && (
+              <button className="lightbox-next" onClick={nextPhoto}>›</button>
+            )}
+          </div>
+        </div>
       )}
       
       <Footer />
+      </motion.div>
     </>
   );
 }

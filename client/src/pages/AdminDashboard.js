@@ -11,12 +11,12 @@ function AdminDashboard() {
   const [uploading, setUploading] = useState(false);
   const [photographer, setPhotographer] = useState('Sushrut Shastri');
   
-  // ADD THESE TWO LINES - this is what was missing!
   const [uploadData, setUploadData] = useState({
     event: '',
     photographer: 'Sushrut Shastri',
     isHero: false,
-    isFeatured: false
+    isFeatured: false,
+    section: 'none'
   });
 
   const navigate = useNavigate();
@@ -55,6 +55,7 @@ function AdminDashboard() {
       await createEvent({ name: newEvent.name, description: '' });
       setNewEvent({ name: '' });
       loadEvents();
+      alert('Event created successfully!');
     } catch (error) {
       alert('Error creating event');
     }
@@ -96,6 +97,7 @@ function AdminDashboard() {
     formData.append('photographer', uploadData.photographer);
     formData.append('isHero', uploadData.isHero);
     formData.append('isFeatured', uploadData.isFeatured);
+    formData.append('section', uploadData.section);
 
     try {
       const token = localStorage.getItem('token');
@@ -114,7 +116,8 @@ function AdminDashboard() {
           event: '',
           photographer: 'Sushrut Shastri',
           isHero: false,
-          isFeatured: false
+          isFeatured: false,
+          section: 'none'
         });
         loadPhotos(uploadData.event);
       } else {
@@ -144,6 +147,19 @@ function AdminDashboard() {
     navigate('/admin-ssp/login');
   };
 
+  // Helper to get section display name
+  const getSectionName = (section) => {
+    const sections = {
+      'none': 'Gallery Only',
+      'hero': 'Hero Slideshow',
+      'home-parallax': 'Home Parallax',
+      'contact-parallax': 'Contact Parallax',
+      'events-parallax': 'Events Parallax',
+      'featured': 'Featured'
+    };
+    return sections[section] || section;
+  };
+
   return (
     <div className="admin-container">
       <div className="admin-header">
@@ -165,7 +181,7 @@ function AdminDashboard() {
               onChange={(e) => setNewEvent({ name: e.target.value })}
               required
             />
-            <button type="submit">Add Category</button>
+            <button type="submit" className="btn btn-primary">Add Category</button>
           </form>
         </div>
 
@@ -173,7 +189,7 @@ function AdminDashboard() {
         <div className="admin-section">
           <h3>Upload Photos</h3>
           <form onSubmit={handleUpload}>
-            <div>
+            <div className="form-group">
               <label>Select Category:</label>
               <select
                 value={uploadData.event}
@@ -187,7 +203,7 @@ function AdminDashboard() {
               </select>
             </div>
 
-            <div>
+            <div className="form-group">
               <label>Photographer:</label>
               <input
                 type="text"
@@ -196,7 +212,23 @@ function AdminDashboard() {
               />
             </div>
 
-            <div>
+            {/* Section Selection - UPDATED with Events Parallax */}
+            <div className="form-group">
+              <label>Where should this photo appear?</label>
+              <select
+                value={uploadData.section}
+                onChange={(e) => setUploadData({ ...uploadData, section: e.target.value })}
+              >
+                <option value="none">General Gallery Only</option>
+                <option value="hero">Homepage Hero Slideshow</option>
+                <option value="home-parallax">Homepage Parallax Background</option>
+                <option value="contact-parallax">Contact Page Parallax Background</option>
+                <option value="events-parallax">Events Page Parallax Background</option>
+                <option value="featured">Featured Section</option>
+              </select>
+            </div>
+
+            <div className="form-group">
               <label>Select Images (max 10):</label>
               <input
                 type="file"
@@ -206,23 +238,28 @@ function AdminDashboard() {
                 required
               />
               {selectedFiles.length > 0 && (
-                <p>{selectedFiles.length} files selected</p>
+                <p className="file-info">{selectedFiles.length} files selected</p>
               )}
             </div>
 
-            {/* Hero Image Checkbox - THIS IS YOUR NEW CODE */}
-            <div style={{ margin: '15px 0' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div className="form-group">
+              <label className="form-check">
                 <input
                   type="checkbox"
                   checked={uploadData.isHero}
                   onChange={(e) => setUploadData({ ...uploadData, isHero: e.target.checked })}
-                />
-                <span>Set as Hero Image (appears in homepage slideshow)</span>
+                /> Set as Hero Image (Homepage Slideshow)
+              </label>
+              <label className="form-check">
+                <input
+                  type="checkbox"
+                  checked={uploadData.isFeatured}
+                  onChange={(e) => setUploadData({ ...uploadData, isFeatured: e.target.checked })}
+                /> Set as Featured Image
               </label>
             </div>
 
-            <button type="submit" disabled={uploading}>
+            <button type="submit" disabled={uploading} className="btn btn-primary">
               {uploading ? 'Uploading...' : 'Upload Photos'}
             </button>
           </form>
@@ -237,7 +274,7 @@ function AdminDashboard() {
                 <h4>{event.name}</h4>
                 <p>{event.imageCount || 0} photos</p>
               </div>
-              <button onClick={() => handleDeleteEvent(event._id)}>Delete</button>
+              <button onClick={() => handleDeleteEvent(event._id)} className="btn btn-danger btn-small">Delete</button>
             </div>
           ))}
         </div>
@@ -245,7 +282,7 @@ function AdminDashboard() {
         {/* Photos Grid */}
         <div className="admin-section">
           <h3>Recent Photos</h3>
-          <div>
+          <div className="form-group">
             <label>Filter by category:</label>
             <select
               onChange={(e) => loadPhotos(e.target.value)}
@@ -262,9 +299,15 @@ function AdminDashboard() {
             {photos.map(photo => (
               <div key={photo._id} className="photo-card">
                 <img src={photo.url} alt={photo.event} />
-                <p>{photo.event}</p>
-                {photo.isHero && <span style={{ color: 'green', fontSize: '12px' }}>⭐ Hero</span>}
-                <button onClick={() => handleDeletePhoto(photo._id)}>Delete</button>
+                <div className="photo-info">
+                  <p><strong>{photo.event}</strong></p>
+                  {photo.section && photo.section !== 'none' && (
+                    <p className="photo-section">{getSectionName(photo.section)}</p>
+                  )}
+                  {photo.isHero && <span className="photo-badge hero">Hero</span>}
+                  {photo.isFeatured && <span className="photo-badge featured">Featured</span>}
+                </div>
+                <button onClick={() => handleDeletePhoto(photo._id)} className="btn btn-danger btn-small">Delete</button>
               </div>
             ))}
           </div>

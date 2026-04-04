@@ -74,6 +74,7 @@ router.post('/photos', auth, upload.array('images', 10), async (req, res) => {
           location: 'Edmonton, Alberta',
           isHero: req.body.isHero === 'true', 
           isFeatured: req.body.isFeatured === 'true', 
+          section: req.body.section || 'none',
         });
         
         await photo.save();

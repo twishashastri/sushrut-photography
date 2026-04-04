@@ -21,6 +21,7 @@ export const fetchPhotos = (event) => {
   return API.get('/photos', { params });
 };
 export const fetchPhotosByEvent = (event) => API.get(`/photos/event/${event}`);
+export const fetchPhotosBySection = (section) => API.get(`/photos/section/${section}`);
 export const deletePhoto = (id) => API.delete(`/photos/${id}`);
 
 export const login = (data) => API.post('/auth/login', data);

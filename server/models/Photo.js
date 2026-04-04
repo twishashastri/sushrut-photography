@@ -23,6 +23,11 @@ const photoSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  section: {
+    type: String,
+    enum: ['hero', 'home-parallax', 'contact-parallax','events-parallax', 'featured', 'none'],
+    default: 'none',
+  },
   order: {
     type: Number,
     default: 0,

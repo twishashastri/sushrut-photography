@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import './styles.css';
 import Home from './pages/Home';
 import Gallery from './pages/Gallery';
@@ -7,11 +7,16 @@ import EventsPage from './pages/EventsPage';
 import Contact from './pages/Contact';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
+import { AnimatePresence } from "framer-motion";
 
-function App() {
+// 👇 NEW component
+function AnimatedRoutes() {
+  const location = useLocation();
+
   return (
-    <Router>
-      <Routes>
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
         <Route path="/gallery" element={<Gallery />} />
@@ -22,7 +27,16 @@ function App() {
         {/* Admin Routes */}
         <Route path="/admin-ssp/login" element={<AdminLogin />} />
         <Route path="/admin-ssp/dashboard" element={<AdminDashboard />} />
+      
       </Routes>
+    </AnimatePresence>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AnimatedRoutes /> {/* 👈 use this instead */}
     </Router>
   );
 }
