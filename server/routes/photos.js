@@ -30,6 +30,17 @@ router.get('/section/:section', async (req, res) => {
   }
 });
 
+router.get('/category/:category', async (req, res) => {
+  try {
+    const photos = await Photo.find({ 
+      event: req.params.category 
+    }).sort({ createdAt: -1 });
+    res.json(photos);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // Get photos by event (public)
 router.get('/event/:event', async (req, res) => {
   try {

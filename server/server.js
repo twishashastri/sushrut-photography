@@ -26,6 +26,7 @@ app.use('/api/photos', require('./routes/photos'));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/upload', require('./routes/upload'));
 app.use('/api/contact', require('./routes/contact'));
+app.use('/api/albums', require('./routes/albums'));
 
 // Health check
 app.get('/api/health', (req, res) => {

@@ -1,18 +1,29 @@
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { motion } from "framer-motion";
-import { fetchPhotos } from '../services/api';
+import { fetchPhotos, fetchPhotosByCategory } from '../services/api';
 
 function Gallery() {
+  const { category } = useParams();
   const [photos, setPhotos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [currentCategory, setCurrentCategory] = useState('');
 
   useEffect(() => {
-    loadAllPhotos();
-  }, []);
+    if (category) {
+      // Load photos for specific category
+      loadCategoryPhotos(category);
+      setCurrentCategory(category);
+    } else {
+      // Load all photos
+      loadAllPhotos();
+      setCurrentCategory('');
+    }
+  }, [category]);
 
   const loadAllPhotos = async () => {
     try {
@@ -20,6 +31,17 @@ function Gallery() {
       setPhotos(data);
     } catch (error) {
       console.error('Error loading photos:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+    const loadCategoryPhotos = async (cat) => {
+    try {
+      const { data } = await fetchPhotosByCategory(cat);
+      setPhotos(data);
+    } catch (error) {
+      console.error('Error loading category photos:', error);
     } finally {
       setLoading(false);
     }
@@ -68,6 +90,12 @@ function Gallery() {
         >
       <Header />
       <main className="gallery-page">
+        {currentCategory && (
+          <div className="gallery-category-header">
+            <h1>{currentCategory.charAt(0).toUpperCase() + currentCategory.slice(1)} Photography</h1>
+            <p>{photos.length} beautiful moments captured</p>
+          </div>
+        )}
         <div className="gallery-masonry">
           {photos.map((photo, index) => (
             <div 

@@ -4,6 +4,7 @@ const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 const Photo = require('../models/Photo');
 const Event = require('../models/Event');
+const Album = require('../models/Album'); 
 const auth = require('../middleware/auth');
 
 // Configure Cloudinary
@@ -70,6 +71,7 @@ router.post('/photos', auth, upload.array('images', 10), async (req, res) => {
         const photo = new Photo({
           url: result.secure_url,
           event,
+          albumId: req.body.albumId || null,
           photographer: photographer || 'Sushrut Shastri',
           location: 'Edmonton, Alberta',
           isHero: req.body.isHero === 'true', 
@@ -87,12 +89,27 @@ router.post('/photos', auth, upload.array('images', 10), async (req, res) => {
       }
     }
     
-    // Update event image count
-    if (photos.length > 0) {
+    // Update event image count 
+    if (photos.length > 0 && !req.body.albumId) {
       await Event.findOneAndUpdate(
         { name: event },
         { $inc: { imageCount: photos.length } }
       );
+    }
+    
+    // Update album photo count if photos were added to an album
+    if (photos.length > 0 && req.body.albumId) {
+      await Album.findByIdAndUpdate(
+        req.body.albumId,
+        { $inc: { photoCount: photos.length } }
+      );
+      
+      // Set cover photo if album doesn't have one
+      const album = await Album.findById(req.body.albumId);
+      if (album && !album.coverPhoto && photos.length > 0) {
+        album.coverPhoto = photos[0].url;
+        await album.save();
+      }
     }
     
     console.log(`Successfully uploaded ${photos.length} photos`);

@@ -115,7 +115,7 @@ function Home() {
                 <p>Whether you're looking for a wedding photographer in Edmonton, need professional portraits, or want to capture your family's precious moments, Sushrut brings creativity and professionalism to every shoot. Serving clients across Alberta including Calgary, Red Deer, and throughout the Edmonton region.</p>
               </div>
               <div className="about-image">
-                <img src={heroImages[0]?.url || 'https://via.placeholder.com/800x600?text=Upload+Photos'} alt="Sushrut Shastri - Edmonton Photographer" />
+                <img src={heroImages[0]?.url} alt="Sushrut Shastri - Edmonton Photographer" />
               </div>
             </div>
           </div>
@@ -127,8 +127,8 @@ function Home() {
             <h2>Photography Services in Edmonton</h2>
             <div className="events-grid">
               {events.map(event => (
-                <Link key={event._id} to={`/gallery/${event.name.toLowerCase()}`} className="event-card">
-                  <img src={event.coverImage || heroImages[0]?.url || 'https://via.placeholder.com/600x400?text=No+Image'} alt={`Edmonton ${event.name} Photography`} />
+                <Link key={event._id} to={`/gallery/category/${event.name.toLowerCase()}`} className="event-card">
+                  <img src={event.coverImage || heroImages[0]?.url} alt={`Edmonton ${event.name} Photography`} />
                   <div className="event-overlay">
                     <h3>{event.name} Photography</h3>
                     <p>{event.imageCount || 0} photos • Edmonton, AB</p>

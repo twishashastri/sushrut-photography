@@ -10,6 +10,11 @@ const photoSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  albumId:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Album',
+    default: null,
+  },
   photographer: {
     type: String,
     default: 'Sushrut Shastri',

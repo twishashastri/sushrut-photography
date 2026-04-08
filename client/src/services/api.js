@@ -23,6 +23,7 @@ export const fetchPhotos = (event) => {
 export const fetchPhotosByEvent = (event) => API.get(`/photos/event/${event}`);
 export const fetchPhotosBySection = (section) => API.get(`/photos/section/${section}`);
 export const deletePhoto = (id) => API.delete(`/photos/${id}`);
+export const fetchPhotosByCategory = (category) => API.get(`/photos/category/${category}`);
 
 export const login = (data) => API.post('/auth/login', data);
 
