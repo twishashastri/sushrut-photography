@@ -5,6 +5,8 @@ import Footer from '../components/Footer';
 import { motion } from "framer-motion";
 import { fetchPhotosBySection } from '../services/api';
 
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
 function EventsPage() {
   const [albums, setAlbums] = useState([]);
   const [parallaxImage, setParallaxImage] = useState('');
@@ -29,7 +31,7 @@ function EventsPage() {
   const loadData = async () => {
     try {
       // Load albums from API
-      const albumsRes = await fetch('http://localhost:5000/api/albums');
+      const albumsRes = await fetch(`${API_URL}/albums`);
       const albumsData = await albumsRes.json();
       setAlbums(albumsData);
       

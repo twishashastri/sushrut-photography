@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchEvents, createEvent, deleteEvent, fetchPhotos, deletePhoto } from '../services/api';
 
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
 function AdminDashboard() {
   const [events, setEvents] = useState([]);
   const [photos, setPhotos] = useState([]);
@@ -66,7 +68,7 @@ function AdminDashboard() {
 
   const loadAlbums = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/albums');
+      const response = await fetch(`${API_URL}/albums`);
       const data = await response.json();
       setAlbums(data);
     } catch (error) {
@@ -76,7 +78,7 @@ function AdminDashboard() {
 
   const loadAlbumPhotosForCover = async (albumId) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/albums/photos-by-id/${albumId}`);
+      const response = await fetch(`${API_URL}/albums/photos-by-id/${albumId}`);
       const data = await response.json();
       
       if (Array.isArray(data) && data.length > 0) {
@@ -95,7 +97,7 @@ function AdminDashboard() {
   const handleSetCoverPhoto = async (albumId, photoUrl) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/albums/${albumId}/cover`, {
+      const response = await fetch(`${API_URL}/albums/${albumId}/cover`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -151,7 +153,7 @@ function AdminDashboard() {
     
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/albums', {
+      const response = await fetch(`${API_URL}/albums`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -179,7 +181,7 @@ function AdminDashboard() {
     if (!window.confirm('Delete this album and all its photos?')) return;
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/albums/${id}`, {
+      const response = await fetch(`${API_URL}/albums/${id}`, {
         method: 'DELETE',
         headers: {
           'x-auth-token': token,
@@ -230,7 +232,7 @@ function AdminDashboard() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/upload/photos', {
+      const response = await fetch(`${API_URL}/upload/photos`, {
         method: 'POST',
         headers: {
           'x-auth-token': token,

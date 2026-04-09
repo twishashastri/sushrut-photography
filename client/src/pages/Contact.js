@@ -4,6 +4,8 @@ import Footer from '../components/Footer';
 import { fetchPhotosBySection } from '../services/api';
 import { motion } from "framer-motion";
 
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
 function Contact() {
   const [formData, setFormData] = useState({
     name: '',
@@ -126,7 +128,7 @@ function Contact() {
     setSubmitError('');
     
     try {
-      const response = await fetch('http://localhost:5000/api/contact/send', {
+      const response = await fetch(`${API_URL}/contact/send`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

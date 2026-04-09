@@ -10,7 +10,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import AlbumDetail from './pages/AlbumDetail';
 import { AnimatePresence } from "framer-motion";
 
-// 👇 NEW component
+// component
 function AnimatedRoutes() {
   const location = useLocation();
 
@@ -39,7 +39,7 @@ function AnimatedRoutes() {
 function App() {
   return (
     <Router>
-      <AnimatedRoutes /> {/* 👈 use this instead */}
+      <AnimatedRoutes /> 
     </Router>
   );
 }

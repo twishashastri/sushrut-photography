@@ -4,6 +4,8 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { motion } from "framer-motion";
 
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
 function AlbumDetail() {
   const { slug } = useParams();
   const [album, setAlbum] = useState(null);
@@ -19,12 +21,12 @@ function AlbumDetail() {
   const loadAlbumData = async () => {
     try {
       // Load album info
-      const albumRes = await fetch(`http://localhost:5000/api/albums/${slug}`);
+      const albumRes = await fetch(`${API_URL}/albums/${slug}`);
       const albumData = await albumRes.json();
       setAlbum(albumData);
       
       // Load album photos
-      const photosRes = await fetch(`http://localhost:5000/api/albums/${slug}/photos`);
+      const photosRes = await fetch(`${API_URL}/albums/${slug}/photos`);
       const photosData = await photosRes.json();
       setPhotos(photosData);
       

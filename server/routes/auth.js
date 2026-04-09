@@ -26,7 +26,7 @@ router.post('/create-admin', async (req, res) => {
     // Create new admin user with hashed password
     const user = new User({ 
       username, 
-      password: hashedPassword,  // Store the hashed password
+      password: hashedPassword,  
       isAdmin: true 
     });
     
