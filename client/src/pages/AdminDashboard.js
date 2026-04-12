@@ -30,7 +30,6 @@ function AdminDashboard() {
     event: '',
     photographer: 'Sushrut Shastri',
     isHero: false,
-    isFeatured: false,
     section: 'none',
     albumId: ''
   });
@@ -226,7 +225,6 @@ function AdminDashboard() {
     formData.append('event', uploadData.event);
     formData.append('photographer', uploadData.photographer);
     formData.append('isHero', uploadData.isHero);
-    formData.append('isFeatured', uploadData.isFeatured);
     formData.append('section', uploadData.section);
     formData.append('albumId', uploadData.albumId);
 
@@ -247,7 +245,6 @@ function AdminDashboard() {
           event: '',
           photographer: 'Sushrut Shastri',
           isHero: false,
-          isFeatured: false,
           section: 'none',
           albumId: ''
         });
@@ -290,8 +287,7 @@ function AdminDashboard() {
       'hero': 'Hero Slideshow',
       'home-parallax': 'Home Parallax',
       'contact-parallax': 'Contact Parallax',
-      'events-parallax': 'Events Parallax',
-      'featured': 'Featured'
+      'events-parallax': 'Events Parallax'
     };
     return sections[section] || section;
   };
@@ -323,7 +319,7 @@ function AdminDashboard() {
 
         {/* Create Client Album */}
         <div className="admin-section">
-          <h3>Client Albums </h3>
+          <h3>Client Albums</h3>
           <button 
             onClick={() => setShowAlbumForm(!showAlbumForm)} 
             className="btn btn-primary"
@@ -454,7 +450,6 @@ function AdminDashboard() {
                 <option value="home-parallax">Homepage Parallax Background</option>
                 <option value="contact-parallax">Contact Page Parallax Background</option>
                 <option value="events-parallax">Events Page Parallax Background</option>
-                <option value="featured">Featured Section</option>
               </select>
             </div>
 
@@ -479,13 +474,6 @@ function AdminDashboard() {
                   checked={uploadData.isHero}
                   onChange={(e) => setUploadData({ ...uploadData, isHero: e.target.checked })}
                 /> Set as Hero Image (Homepage Slideshow)
-              </label>
-              <label className="form-check">
-                <input
-                  type="checkbox"
-                  checked={uploadData.isFeatured}
-                  onChange={(e) => setUploadData({ ...uploadData, isFeatured: e.target.checked })}
-                /> Set as Featured Image
               </label>
             </div>
 
@@ -535,7 +523,6 @@ function AdminDashboard() {
                     <p className="photo-section">{getSectionName(photo.section)}</p>
                   )}
                   {photo.isHero && <span className="photo-badge hero">Hero</span>}
-                  {photo.isFeatured && <span className="photo-badge featured">Featured</span>}
                 </div>
                 <button onClick={() => handleDeletePhoto(photo._id)} className="btn btn-danger btn-small">Delete</button>
               </div>
