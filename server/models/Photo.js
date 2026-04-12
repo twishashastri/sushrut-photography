@@ -20,14 +20,6 @@ const photoSchema = new mongoose.Schema({
     default: 'Sushrut Shastri',
   },
   description: String,
-  isHero: {
-    type: Boolean,
-    default: false,
-  },
-  isFeatured: {
-    type: Boolean,
-    default: false,
-  },
   section: {
     type: String,
     enum: ['hero', 'home-parallax', 'contact-parallax','events-parallax', 'featured', 'none'],

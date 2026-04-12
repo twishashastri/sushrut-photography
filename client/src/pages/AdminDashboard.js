@@ -25,13 +25,12 @@ function AdminDashboard() {
   const [showCoverModal, setShowCoverModal] = useState(false);
   const [albumPhotosForCover, setAlbumPhotosForCover] = useState([]);
   const [selectedAlbumForCover, setSelectedAlbumForCover] = useState(null);
-  
+
   const [uploadData, setUploadData] = useState({
-    event: '',
-    photographer: 'Sushrut Shastri',
-    isHero: false,
-    section: 'none',
-    albumId: ''
+  event: '',
+  photographer: 'Sushrut Shastri',
+  section: 'none',
+  albumId: ''
   });
 
   const navigate = useNavigate();
@@ -224,7 +223,6 @@ function AdminDashboard() {
     
     formData.append('event', uploadData.event);
     formData.append('photographer', uploadData.photographer);
-    formData.append('isHero', uploadData.isHero);
     formData.append('section', uploadData.section);
     formData.append('albumId', uploadData.albumId);
 
@@ -244,7 +242,6 @@ function AdminDashboard() {
         setUploadData({
           event: '',
           photographer: 'Sushrut Shastri',
-          isHero: false,
           section: 'none',
           albumId: ''
         });
@@ -466,17 +463,6 @@ function AdminDashboard() {
                 <p className="file-info">{selectedFiles.length} files selected</p>
               )}
             </div>
-
-            <div className="form-group">
-              <label className="form-check">
-                <input
-                  type="checkbox"
-                  checked={uploadData.isHero}
-                  onChange={(e) => setUploadData({ ...uploadData, isHero: e.target.checked })}
-                /> Set as Hero Image (Homepage Slideshow)
-              </label>
-            </div>
-
             <button type="submit" disabled={uploading} className="btn btn-primary">
               {uploading ? 'Uploading...' : 'Upload Photos'}
             </button>
@@ -522,7 +508,6 @@ function AdminDashboard() {
                   {photo.section && photo.section !== 'none' && (
                     <p className="photo-section">{getSectionName(photo.section)}</p>
                   )}
-                  {photo.isHero && <span className="photo-badge hero">Hero</span>}
                 </div>
                 <button onClick={() => handleDeletePhoto(photo._id)} className="btn btn-danger btn-small">Delete</button>
               </div>
