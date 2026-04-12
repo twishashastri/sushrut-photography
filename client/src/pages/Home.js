@@ -133,7 +133,7 @@ function Home() {
                 <p>Whether you're looking for a wedding photographer in Edmonton, need professional portraits, or want to capture your family's precious moments, Sushrut brings creativity and professionalism to every shoot. Serving clients across Alberta including Calgary, Red Deer, and throughout the Edmonton region.</p>
               </div>
               <div className="about-image">
-                <img src={heroImages[0]?.url} alt="Sushrut Shastri - Edmonton Photographer" />
+                <img src="/sushrut-photo.jpg" alt="Sushrut Shastri - Edmonton Photographer" />
               </div>
             </div>
           </div>

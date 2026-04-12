@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -12,18 +12,46 @@ function Gallery() {
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [currentCategory, setCurrentCategory] = useState('');
+  
+  // Track which images are visible
+  const [visibleItems, setVisibleItems] = useState({});
+  const itemRefs = useRef({});
 
   useEffect(() => {
     if (category) {
-      // Load photos for specific category
       loadCategoryPhotos(category);
       setCurrentCategory(category);
     } else {
-      // Load all photos
       loadAllPhotos();
       setCurrentCategory('');
     }
   }, [category]);
+
+  // Setup intersection observer for scroll reveal
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const index = entry.target.dataset.index;
+            setVisibleItems((prev) => ({ ...prev, [index]: true }));
+            observer.unobserve(entry.target); 
+          }
+        });
+      },
+      {
+        threshold: 0.1, 
+        rootMargin: '50px', 
+      }
+    );
+
+    // Observe all image elements
+    Object.values(itemRefs.current).forEach((ref) => {
+      if (ref) observer.observe(ref);
+    });
+
+    return () => observer.disconnect();
+  }, [photos]); 
 
   const loadAllPhotos = async () => {
     try {
@@ -36,8 +64,8 @@ function Gallery() {
     }
   };
 
-    const loadCategoryPhotos = async (cat) => {
-      console.log('Fetching category:', cat);
+  const loadCategoryPhotos = async (cat) => {
+    console.log('Fetching category:', cat);
     try {
       const { data } = await fetchPhotosByCategory(cat);
       console.log('Photos received:', data);
@@ -84,60 +112,68 @@ function Gallery() {
 
   return (
     <>
-        <motion.div
+      <motion.div
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.98 }}
         transition={{ duration: 0.6, ease: "easeInOut" }}
-        >
-      <Header />
-      <main className="gallery-page">
-        {currentCategory && (
-          <div className="gallery-category-header">
-            <h1>{currentCategory.charAt(0).toUpperCase() + currentCategory.slice(1)} Photography</h1>
-            <p>{photos.length} beautiful moments captured</p>
+      >
+        <Header />
+        <main className="gallery-page">
+          {currentCategory && (
+            <div className="gallery-category-header">
+              <h1>{currentCategory.charAt(0).toUpperCase() + currentCategory.slice(1)} Photography</h1>
+              <p>{photos.length} beautiful moments captured</p>
+            </div>
+          )}
+          <div className="gallery-masonry">
+            {photos.map((photo, index) => (
+              <motion.div
+                key={photo._id}
+                ref={(el) => (itemRefs.current[index] = el)}
+                data-index={index}
+                className="gallery-masonry-item"
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ 
+                  opacity: visibleItems[index] ? 1 : 0,
+                  y: visibleItems[index] ? 0 : 50
+                }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                onClick={() => openLightbox(photo, index)}
+              >
+                <img 
+                  src={photo.url} 
+                  alt="" 
+                  loading="lazy"
+                />
+              </motion.div>
+            ))}
+          </div>
+        </main>
+        
+        {selectedPhoto && (
+          <div className="lightbox-overlay" onClick={closeLightbox}>
+            <div className="lightbox-container" onClick={(e) => e.stopPropagation()}>
+              <button className="lightbox-close" onClick={closeLightbox}>×</button>
+              
+              {photos.length > 1 && (
+                <button className="lightbox-prev" onClick={prevPhoto}>‹</button>
+              )}
+              
+              <img 
+                src={selectedPhoto.url} 
+                alt="" 
+                className="lightbox-image" 
+              />
+              
+              {photos.length > 1 && (
+                <button className="lightbox-next" onClick={nextPhoto}>›</button>
+              )}
+            </div>
           </div>
         )}
-        <div className="gallery-masonry">
-          {photos.map((photo, index) => (
-            <div 
-              key={photo._id} 
-              className="gallery-masonry-item"
-              onClick={() => openLightbox(photo, index)}
-            >
-              <img 
-                src={photo.url} 
-                alt="" 
-                loading="lazy"
-              />
-            </div>
-          ))}
-        </div>
-      </main>
-      
-      {selectedPhoto && (
-        <div className="lightbox-overlay" onClick={closeLightbox}>
-          <div className="lightbox-container" onClick={(e) => e.stopPropagation()}>
-            <button className="lightbox-close" onClick={closeLightbox}>×</button>
-            
-            {photos.length > 1 && (
-              <button className="lightbox-prev" onClick={prevPhoto}>‹</button>
-            )}
-            
-            <img 
-              src={selectedPhoto.url} 
-              alt="" 
-              className="lightbox-image" 
-            />
-            
-            {photos.length > 1 && (
-              <button className="lightbox-next" onClick={nextPhoto}>›</button>
-            )}
-          </div>
-        </div>
-      )}
-      
-      <Footer />
+        
+        <Footer />
       </motion.div>
     </>
   );

@@ -25,6 +25,10 @@ body {
   background-color: var(--primary)
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 a{
   transition: all 0.3s ease;
 }
@@ -568,6 +572,8 @@ a{
 .gallery-masonry-item {
   break-inside: avoid;
   cursor: pointer;
+  opacity: 0;
+  will-change: transform, opacity;
   line-height: 0;
 }
 
@@ -575,7 +581,7 @@ a{
   width: 100%;
   height: auto;
   display: block;
-  transition: opacity 0.3s ease;
+  transition: transform 0.5s ease, opacity 0.3s ease;
   padding: 2px;
 }
 
@@ -585,6 +591,17 @@ a{
 }
 .gallery-masonry-item:hover img {
   opacity: 0.85;
+}
+
+.gallery-masonry-item.loading {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
 @media (max-width: 992px) {
