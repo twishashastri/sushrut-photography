@@ -37,8 +37,10 @@ function Gallery() {
   };
 
     const loadCategoryPhotos = async (cat) => {
+      console.log('Fetching category:', cat);
     try {
       const { data } = await fetchPhotosByCategory(cat);
+      console.log('Photos received:', data);
       setPhotos(data);
     } catch (error) {
       console.error('Error loading category photos:', error);

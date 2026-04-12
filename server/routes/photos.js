@@ -33,7 +33,7 @@ router.get('/section/:section', async (req, res) => {
 router.get('/category/:category', async (req, res) => {
   try {
     const photos = await Photo.find({ 
-      event: req.params.category 
+      event: { $regex: new RegExp(`^${req.params.category}$`, 'i') } 
     }).sort({ createdAt: -1 });
     res.json(photos);
   } catch (error) {

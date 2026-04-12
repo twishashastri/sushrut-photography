@@ -9,6 +9,7 @@ function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [heroImages, setHeroImages] = useState([]);
   const [events, setEvents] = useState([]);
+  const [categoryCovers, setCategoryCovers] = useState({});
   const [parallaxImage, setParallaxImage] = useState('');
   const [loading, setLoading] = useState(true);
   const ref = useRef(null);
@@ -43,7 +44,29 @@ function Home() {
     try {
       // Fetch events from database
       const eventsData = await fetchEvents();
-      setEvents(eventsData.data);
+      const events = eventsData.data;
+      
+      // Fetch a cover image for each event
+      const covers = {};
+      for (const event of events) {
+        try {
+          // Fetch photos for this specific category
+          const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/photos/category/${event.name}`);
+          const photos = await response.json();
+          
+          // Use the first photo as cover, or keep existing coverImage
+          if (photos.length > 0) {
+            covers[event.name] = photos[0].url;
+          } else if (event.coverImage) {
+            covers[event.name] = event.coverImage;
+          }
+        } catch (err) {
+          console.error(`Error fetching cover for ${event.name}:`, err);
+        }
+      }
+      
+      setEvents(events);
+      setCategoryCovers(covers);
       
       // Fetch hero images (section: "hero")
       const heroData = await fetchPhotosBySection('hero');
@@ -87,17 +110,12 @@ function Home() {
       <main>
         {/* Hero Section - Slideshow from database */}
         <section className="hero">
-          {heroImages.length > 0 ? (
-            heroImages.map((img, index) => (
+          {heroImages.map((img, index) => (
               <div key={img._id} className={`hero-slide ${index === currentSlide ? 'active' : ''}`}>
                 <img src={img.url} alt={`Sushrut Shastri Photography - Edmonton`} />
               </div>
             ))
-          ) : (
-            <div className="hero-slide active">
-              <img src="https://via.placeholder.com/1920x1080?text=Upload+Photos" alt="Placeholder" />
-            </div>
-          )}
+          }
           <div className="hero-overlay"></div>
           <div className="hero-content">
             <h1>Sushrut Shastri Photography</h1>
@@ -128,7 +146,7 @@ function Home() {
             <div className="events-grid">
               {events.map(event => (
                 <Link key={event._id} to={`/gallery/category/${event.name.toLowerCase()}`} className="event-card">
-                  <img src={event.coverImage || heroImages[0]?.url} alt={`Edmonton ${event.name} Photography`} />
+                  <img src={categoryCovers[event.name] || heroImages[0]?.url} alt={`Edmonton ${event.name} Photography`} />
                   <div className="event-overlay">
                     <h3>{event.name} Photography</h3>
                     <p>{event.imageCount || 0} photos • Edmonton, AB</p>

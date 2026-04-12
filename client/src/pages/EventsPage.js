@@ -103,7 +103,7 @@ function EventsPage() {
                   >
                     <div className="event-image">
                       <img 
-                        src={album.coverPhoto || 'https://via.placeholder.com/600x400?text=No+Image'} 
+                        src={album.coverPhoto} 
                         alt={album.clientName} 
                       />
                       <div className="event-overlay-large">
