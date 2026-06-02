@@ -110,13 +110,15 @@ a{
   display: none;
   position: fixed;
   background: var(--black);
-  padding: var(--space-xl);
+  padding: var(--space-lg);
   flex-direction: column;
   z-index: 1000;
 }
 
 .mobile-menu.open {
   display: flex;
+  justify-self: end;
+
 }
 
 .close-btn {
@@ -126,20 +128,19 @@ a{
   background: none;
   border: none;
   color: var(--white);
-  font-size: 1.5rem;
   cursor: pointer;
 }
 
 .mobile-nav-links {
   display: flex;
   flex-direction: column;
-  gap: var(--space-xl);
+  gap: var(--space-lg);
   margin-top: var(--space-xl);
 }
 
 .mobile-nav-links a {
   color: var(--white);
-  font-size: 2rem;
+  font-size: 1.1rem;
   text-decoration: none;
 }
 
