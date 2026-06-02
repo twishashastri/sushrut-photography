@@ -36,7 +36,7 @@ function Home() {
     if (heroImages.length === 0) return;
     const timer = setInterval(() => {
       setCurrentSlide(prev => (prev + 1) % heroImages.length);
-    }, 5000);
+    }, 3000);
     return () => clearInterval(timer);
   }, [heroImages]);
 
