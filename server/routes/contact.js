@@ -8,14 +8,17 @@ console.log('EMAIL_PASS exists:', !!process.env.EMAIL_PASS);
 
 // Configure email transporter
 const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
+  host: "smtp.gmail.com",
   port: 587,
   secure: false,
-  family: 4,
+  requireTLS: true,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
-  }
+  },
+  connectionTimeout: 60000,
+  greetingTimeout: 60000,
+  socketTimeout: 60000
 });
 
 transporter.verify(function(error, success) {
