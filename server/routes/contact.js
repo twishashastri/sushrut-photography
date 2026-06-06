@@ -7,15 +7,26 @@ console.log('EMAIL_USER:', process.env.EMAIL_USER);
 console.log('EMAIL_PASS exists:', !!process.env.EMAIL_PASS);
 
 // Configure email transporter
+const dns = require('dns');
+
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: 'smtp.gmail.com',
+  port: 587,
+  secure: false,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
   },
-  connectionTimeout: 60000,
-  greetingTimeout: 60000,
-  socketTimeout: 60000
+  tls: {
+    rejectUnauthorized: false
+  },
+  getSocket: (options, callback) => {
+    dns.lookup(options.host, { family: 4 }, (err, address) => {
+      if (err) return callback(err);
+      options.host = address;
+      callback(null, false);
+    });
+  }
 });
 
 transporter.verify(function(error, success) {
