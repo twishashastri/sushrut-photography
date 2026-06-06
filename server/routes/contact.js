@@ -3,13 +3,27 @@ const router = express.Router();
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 
+console.log('EMAIL_USER:', process.env.EMAIL_USER);
+console.log('EMAIL_PASS exists:', !!process.env.EMAIL_PASS);
+
 // Configure email transporter
 const transporter = nodemailer.createTransport({
-  service: 'gmail', 
+  host: 'smtp.gmail.com',
+  port: 587,
+  secure: false,
+  family: 4,
   auth: {
-    user: process.env.EMAIL_USER, 
-    pass: process.env.EMAIL_PASS, 
-  },
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
+
+transporter.verify(function(error, success) {
+  if (error) {
+    console.log('SMTP Error:', error);
+  } else {
+    console.log('SMTP Ready');
+  }
 });
 
 // Send contact form
@@ -55,7 +69,11 @@ router.post('/send', async (req, res) => {
     
   } catch (error) {
     console.error('Contact form error:', error);
-    res.status(500).json({ success: false, message: 'Failed to send email' });
+    res.status(500).json({ success: false , error: error.message,
+    stack: process.env.NODE_ENV === 'development'
+      ? error.stack
+      : undefined
+  });
   }
 });
 
