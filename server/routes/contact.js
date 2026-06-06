@@ -68,13 +68,15 @@ router.post('/send', async (req, res) => {
     res.json({ success: true, message: 'Email sent successfully' });
     
   } catch (error) {
-    console.error('Contact form error:', error);
-    res.status(500).json({ success: false , error: error.message,
-    stack: process.env.NODE_ENV === 'development'
-      ? error.stack
-      : undefined
+  console.error('Contact form error:', error);
+
+  res.status(500).json({
+    success: false,
+    error: error.message,
+    code: error.code,
+    command: error.command
   });
-  }
+}
 });
 
 module.exports = router;
