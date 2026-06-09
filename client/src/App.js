@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import ScrollToTop from './components/ScrollToTop';
 import './styles.css';
 import Home from './pages/Home';
 import Gallery from './pages/Gallery';
@@ -39,6 +40,7 @@ function AnimatedRoutes() {
 function App() {
   return (
     <Router>
+      <ScrollToTop /> 
       <AnimatedRoutes /> 
     </Router>
   );

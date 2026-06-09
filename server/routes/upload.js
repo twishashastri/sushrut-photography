@@ -62,7 +62,7 @@ router.post('/photos', auth, upload.array('images', 10), async (req, res) => {
         const result = await cloudinary.uploader.upload(dataURI, {
           folder: 'sushrut-photography',
           transformation: [{ quality: "auto:best" }],
-          format: 'auto',
+          fetch_format: "auto"
         });
         
         console.log(`Uploaded to Cloudinary:`, result.secure_url);
