@@ -566,7 +566,6 @@ a{
 .gallery-masonry-item {
   break-inside: avoid;
   cursor: pointer;
-  opacity: 0;
   will-change: transform, opacity;
   line-height: 0;
 }

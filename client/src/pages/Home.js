@@ -146,7 +146,7 @@ function Home() {
             <div className="events-grid">
               {events.map(event => (
                 <Link key={event._id} to={`/gallery/category/${event.name.toLowerCase()}`} className="event-card">
-                  <img src={categoryCovers[event.name] || heroImages[0]?.url} alt={`Edmonton ${event.name} Photography`} />
+                  <img src={categoryCovers[event.name]} alt={`Edmonton ${event.name} Photography`} />
                   <div className="event-overlay">
                     <h3>{event.name} Photography</h3>
                     <p>{event.imageCount || 0} photos • Edmonton, AB</p>
