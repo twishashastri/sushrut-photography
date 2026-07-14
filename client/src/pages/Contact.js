@@ -141,17 +141,21 @@ function Contact() {
         return;
       }
       
-      // Prepare template parameters
+      // Prepare template parameters - MUST MATCH YOUR TEMPLATE VARIABLES EXACTLY!
       const templateParams = {
         from_name: formData.name,
         from_email: formData.email,
-        phone: formData.phone,
+        phone: formData.phone || 'Not provided',
         event_type: formData.eventType,
         message: formData.message,
-        to_email: 'sushrutshastriphotography@gmail.com'
+        // If your template uses different variable names, update these:
+        // to_email: 'sushrutshastriphotography@gmail.com' // Only if your template has 'to_email'
       };
       
       console.log('Sending email with params:', templateParams);
+      console.log('Service ID:', serviceId);
+      console.log('Template ID:', templateId);
+      console.log('Public Key exists:', !!publicKey);
       
       // Send notification to photographer (client)
       const response = await emailjs.send(
@@ -164,16 +168,19 @@ function Contact() {
       console.log('EmailJS response:', response);
       
       if (response.status === 200) {
-        // If auto-reply template exists, send thank-you to customer
-        if (autoReplyTemplateId) {
+        // If auto-reply template exists and is configured, send thank-you to customer
+        if (autoReplyTemplateId && autoReplyTemplateId !== 'undefined') {
           try {
             const replyParams = {
               from_name: formData.name,
               from_email: formData.email,
               event_type: formData.eventType,
               message: formData.message,
-              to_email: formData.email // Send to the person who filled the form
+              // For auto-reply, send to the person who filled the form
+              to_email: formData.email
             };
+            
+            console.log('Sending auto-reply with params:', replyParams);
             
             await emailjs.send(
               serviceId,
@@ -186,6 +193,8 @@ function Contact() {
             console.error('Auto-reply failed:', autoReplyError);
             // Don't fail the whole form if auto-reply fails
           }
+        } else {
+          console.log('No auto-reply template configured, skipping...');
         }
         
         setSubmitted(true);
@@ -202,7 +211,16 @@ function Contact() {
       }
     } catch (error) {
       console.error('Error sending message:', error);
-      setSubmitError('Failed to send message. Please try again. Error: ' + (error.text || error.message));
+      
+      // Better error message based on status
+      let errorMessage = 'Failed to send message. Please try again.';
+      if (error.status === 422) {
+        errorMessage = 'Email configuration error. Please check your template variables match the code.';
+      } else if (error.text) {
+        errorMessage = `Error: ${error.text}`;
+      }
+      
+      setSubmitError(errorMessage);
     } finally {
       setSending(false);
     }
