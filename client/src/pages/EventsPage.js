@@ -104,7 +104,7 @@ function EventsPage() {
                     <div className="event-image">
                       <img 
                         src={album.coverPhoto} 
-                        alt={album.clientName} 
+                        alt={album.clientName} loading="lazy"
                       />
                       <div className="event-overlay-large">
                         <h2>{album.clientName}</h2>

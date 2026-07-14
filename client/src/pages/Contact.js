@@ -1,12 +1,12 @@
-import React, { useState, useEffect,useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import emailjs from '@emailjs/browser';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { fetchPhotosBySection } from '../services/api';
 import { motion } from "framer-motion";
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-
 function Contact() {
+  const formRef = useRef(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -23,16 +23,16 @@ function Contact() {
   const ref = useRef(null);
   const [offset, setOffset] = useState(0);
     
-    useEffect(() => {
-        const handleScroll = () => {
-        if (!ref.current) return;
-        const rect = ref.current.getBoundingClientRect();
-        setOffset(rect.top);
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!ref.current) return;
+      const rect = ref.current.getBoundingClientRect();
+      setOffset(rect.top);
     };
     
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-    }, []);
+  }, []);
     
   // Load parallax image from database
   useEffect(() => {
@@ -63,11 +63,6 @@ function Contact() {
     if (!email.trim()) return 'Email is required';
     const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
     if (!emailRegex.test(email)) return 'Please enter a valid email address';
-    const disposableDomains = ['tempmail.com', 'throwaway.com', 'mailinator.com', 'guerrillamail.com'];
-    const domain = email.split('@')[1];
-    if (disposableDomains.includes(domain?.toLowerCase())) {
-      return 'Please use a valid email address';
-    }
     return '';
   };
 
@@ -128,24 +123,86 @@ function Contact() {
     setSubmitError('');
     
     try {
-      const response = await fetch(`${API_URL}/contact/send`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+      // Get EmailJS credentials from environment variables
+      const serviceId = process.env.REACT_APP_EMAILJS_SERVICE_ID;
+      const templateId = process.env.REACT_APP_EMAILJS_TEMPLATE_ID;
+      const autoReplyTemplateId = process.env.REACT_APP_EMAILJS_AUTO_REPLY_TEMPLATE_ID;
+      const publicKey = process.env.REACT_APP_EMAILJS_PUBLIC_KEY;
       
-      const data = await response.json();
+      // Validate that all required variables are set
+      if (!serviceId || !templateId || !publicKey) {
+        console.error('Missing EmailJS environment variables:', {
+          serviceId: !!serviceId,
+          templateId: !!templateId,
+          publicKey: !!publicKey
+        });
+        setSubmitError('Email configuration error. Please contact the website owner.');
+        setSending(false);
+        return;
+      }
       
-      if (data.success) {
+      // Prepare template parameters
+      const templateParams = {
+        from_name: formData.name,
+        from_email: formData.email,
+        phone: formData.phone,
+        event_type: formData.eventType,
+        message: formData.message,
+        to_email: 'sushrutshastriphotography@gmail.com'
+      };
+      
+      console.log('Sending email with params:', templateParams);
+      
+      // Send notification to photographer (client)
+      const response = await emailjs.send(
+        serviceId,
+        templateId,
+        templateParams,
+        publicKey
+      );
+      
+      console.log('EmailJS response:', response);
+      
+      if (response.status === 200) {
+        // If auto-reply template exists, send thank-you to customer
+        if (autoReplyTemplateId) {
+          try {
+            const replyParams = {
+              from_name: formData.name,
+              from_email: formData.email,
+              event_type: formData.eventType,
+              message: formData.message,
+              to_email: formData.email // Send to the person who filled the form
+            };
+            
+            await emailjs.send(
+              serviceId,
+              autoReplyTemplateId,
+              replyParams,
+              publicKey
+            );
+            console.log('Auto-reply sent successfully');
+          } catch (autoReplyError) {
+            console.error('Auto-reply failed:', autoReplyError);
+            // Don't fail the whole form if auto-reply fails
+          }
+        }
+        
         setSubmitted(true);
+        // Reset form
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          eventType: '',
+          message: ''
+        });
       } else {
         setSubmitError('Failed to send message. Please try again.');
       }
     } catch (error) {
       console.error('Error sending message:', error);
-      setSubmitError('Network error. Please try again.');
+      setSubmitError('Failed to send message. Please try again. Error: ' + (error.text || error.message));
     } finally {
       setSending(false);
     }
@@ -166,168 +223,176 @@ function Contact() {
 
   return (
     <>
-        <motion.div
+      <motion.div
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.98 }}
         transition={{ duration: 0.6, ease: "easeInOut" }}
-        >
-      <Header />
-      <main>
-       {/* Parallax Hero Section */}
-        <section className="parallax-section contact-hero" ref={ref}>
-        {parallaxImage ? (
-            <div 
-            className="parallax-bg" 
-            style={{ 
-                backgroundImage: `url(${parallaxImage})`,
-                transform: `translateY(${offset * 0.15}px)`
-            }}
-            ></div>
-        ) : (
-            <div className="parallax-bg-placeholder"></div>
-        )}
-        <div className="parallax-content">
-            <h1>Let's Create Together</h1>
-            <p>Available for weddings, portraits, and commercial work in Edmonton and across Alberta.</p>
-        </div>
-        </section>
+      >
+        <Header />
+        <main>
+          {/* Parallax Hero Section */}
+          <section className="parallax-section contact-hero" ref={ref}>
+            {parallaxImage ? (
+              <div 
+                className="parallax-bg" 
+                style={{ 
+                  backgroundImage: `url(${parallaxImage})`,
+                  transform: `translateY(${offset * 0.15}px)`
+                }}
+              ></div>
+            ) : (
+              <div className="parallax-bg-placeholder"></div>
+            )}
+            <div className="parallax-content">
+              <h1>Let's Create Together</h1>
+              <p>Available for weddings, portraits, and commercial work in Edmonton and across Alberta.</p>
+            </div>
+          </section>
 
-        {/* Contact Form with Parallax Background */}
-        <div className="contact-form-parallax" ref={ref}>
-        {parallaxImage ? (
-            <div 
-            className="contact-form-bg" 
-            style={{ 
-                backgroundImage: `url(${parallaxImage})`,
-                transform: `translateY(${offset * 0.15}px)`
-            }}
-            ></div>
-        ) : (
-            <div className="contact-form-bg-placeholder"></div>
-        )}
-        <div className="contact-form-overlay"></div>
-        <div className="container">
-            <div className="contact-grid">
-              <div className="contact-info">
-                <h2>Get in Touch</h2>
-                <p>Based in Edmonton, Alberta, I'm available for photography sessions throughout Alberta. Whether you're planning a wedding, need professional portraits, or have a commercial project, I'd love to hear from you.</p>
-                
-                <div className="contact-details">
-                  <div>
-                    <strong> Location</strong>
-                    <p>Edmonton, Alberta, Canada</p>
+          {/* Contact Form with Parallax Background */}
+          <div className="contact-form-parallax" ref={ref}>
+            {parallaxImage ? (
+              <div 
+                className="contact-form-bg" 
+                style={{ 
+                  backgroundImage: `url(${parallaxImage})`,
+                  transform: `translateY(${offset * 0.15}px)`
+                }}
+              ></div>
+            ) : (
+              <div className="contact-form-bg-placeholder"></div>
+            )}
+            <div className="contact-form-overlay"></div>
+            <div className="container">
+              <div className="contact-grid">
+                <div className="contact-info">
+                  <h2>Get in Touch</h2>
+                  <p>Based in Edmonton, Alberta, I'm available for photography sessions throughout Alberta. Whether you're planning a wedding, need professional portraits, or have a commercial project, I'd love to hear from you.</p>
+                  
+                  <div className="contact-details">
+                    <div>
+                      <strong>Location</strong>
+                      <p>Edmonton, Alberta, Canada</p>
+                    </div>
+                    <div>
+                      <strong>Email</strong>
+                      <p>sushrutshastriphotography@gmail.com</p>
+                    </div>
+                    <div>
+                      <strong>Phone</strong>
+                      <p>(780) 893-5919</p>
+                    </div>
+                    <div>
+                      <strong>Hours</strong>
+                      <p>Monday - Friday: 9am - 6pm<br />Weekends: By appointment</p>
+                    </div>
                   </div>
-                  <div>
-                    <strong> Email</strong>
-                    <p>sushrutshastriphotography@gmail.com</p>
-                  </div>
-                  <div>
-                    <strong> Phone</strong>
-                    <p>(780) 893-5919</p>
-                  </div>
-                  <div>
-                    <strong>Hours</strong>
-                    <p>Monday - Friday: 9am - 6pm<br />Weekends: By appointment</p>
+
+                  <div className="social-links">
+                    <a href="https://www.instagram.com/sushrutshastriphotography/" target="_blank" rel="noopener noreferrer" className="social-link">Instagram</a>
+                    <a href="https://www.facebook.com/people/Sushrut-Shastri-Photography/61580716311894/" target="_blank" rel="noopener noreferrer" className="social-link">Facebook</a>
                   </div>
                 </div>
 
-                <div className="social-links">
-                  <a href="https://www.instagram.com/sushrutshastriphotography/" target="_blank" rel="noopener noreferrer" className="social-link">Instagram</a>
-                  <a href="https://www.facebook.com/people/Sushrut-Shastri-Photography/61580716311894/" target="_blank" rel="noopener noreferrer" className="social-link">Facebook</a>
+                <div className="contact-form-card">
+                  {submitted ? (
+                    <div className="success-message">
+                      <h3>Thank you for reaching out!</h3>
+                      <p>I'll get back to you within 24-48 hours.</p>
+                    </div>
+                  ) : (
+                    <form ref={formRef} onSubmit={handleSubmit} noValidate>
+                      {submitError && (
+                        <div className="error-message">{submitError}</div>
+                      )}
+                      
+                      <div className="form-group">
+                        <label htmlFor="name">Name *</label>
+                        <input
+                          id="name"
+                          type="text"
+                          name="name"
+                          value={formData.name}
+                          onChange={handleChange}
+                          className={errors.name ? 'error' : ''}
+                          placeholder="Your full name"
+                        />
+                        {errors.name && <span className="field-error">{errors.name}</span>}
+                      </div>
+
+                      <div className="form-group">
+                        <label htmlFor="email">Email *</label>
+                        <input
+                          id="email"
+                          type="email"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleChange}
+                          className={errors.email ? 'error' : ''}
+                          placeholder="Your email address"
+                        />
+                        {errors.email && <span className="field-error">{errors.email}</span>}
+                      </div>
+
+                      <div className="form-group">
+                        <label htmlFor="phone">Phone * (Canadian format)</label>
+                        <input
+                          id="phone"
+                          type="tel"
+                          name="phone"
+                          value={formData.phone}
+                          onChange={handlePhoneChange}
+                          className={errors.phone ? 'error' : ''}
+                          placeholder="Your contact number"
+                        />
+                        {errors.phone && <span className="field-error">{errors.phone}</span>}
+                      </div>
+
+                      <div className="form-group">
+                        <label htmlFor="eventType">Event Type *</label>
+                        <select
+                          id="eventType"
+                          name="eventType"
+                          value={formData.eventType}
+                          onChange={handleChange}
+                          className={errors.eventType ? 'error' : ''}
+                        >
+                          <option value="">Select event type</option>
+                          <option value="Wedding">Wedding Photography</option>
+                          <option value="Portrait">Portrait Session</option>
+                          <option value="Commercial">Commercial Work</option>
+                          <option value="Family">Family Session</option>
+                          <option value="Other">Other</option>
+                        </select>
+                        {errors.eventType && <span className="field-error">{errors.eventType}</span>}
+                      </div>
+
+                      <div className="form-group">
+                        <label htmlFor="message">Message *</label>
+                        <textarea
+                          id="message"
+                          name="message"
+                          rows="5"
+                          value={formData.message}
+                          onChange={handleChange}
+                          className={errors.message ? 'error' : ''}
+                          placeholder="Tell me about your vision, event details, or any questions you have..."
+                        />
+                        {errors.message && <span className="field-error">{errors.message}</span>}
+                      </div>
+
+                      <button type="submit" className="btn-submit" disabled={sending}>
+                        {sending ? 'Sending...' : 'Send Message'}
+                      </button>
+                    </form>
+                  )}
                 </div>
-              </div>
-
-              <div className="contact-form-card">
-                {submitted ? (
-                  <div className="success-message">
-                    <h3>Thank you for reaching out!</h3>
-                    <p>I'll get back to you within 24-48 hours. A confirmation email has been sent to your inbox.</p>
-                  </div>
-                ) : (
-                  <form onSubmit={handleSubmit} noValidate>
-                    {submitError && (
-                      <div className="error-message">{submitError}</div>
-                    )}
-                    
-                    <div className="form-group">
-                      <label>Name *</label>
-                      <input
-                        type="text"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        className={errors.name ? 'error' : ''}
-                      />
-                      {errors.name && <span className="field-error">{errors.name}</span>}
-                    </div>
-
-                    <div className="form-group">
-                      <label>Email *</label>
-                      <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        className={errors.email ? 'error' : ''}
-                      />
-                      {errors.email && <span className="field-error">{errors.email}</span>}
-                    </div>
-
-                    <div className="form-group">
-                      <label>Phone * (Canadian format)</label>
-                      <input
-                        type="tel"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handlePhoneChange}
-                        className={errors.phone ? 'error' : ''}
-                      />
-                      {errors.phone && <span className="field-error">{errors.phone}</span>}
-                    </div>
-
-                    <div className="form-group">
-                      <label>Event Type *</label>
-                      <select
-                        name="eventType"
-                        value={formData.eventType}
-                        onChange={handleChange}
-                        className={errors.eventType ? 'error' : ''}
-                      >
-                        <option value="">Select event type</option>
-                        <option value="Wedding">Wedding Photography</option>
-                        <option value="Portrait">Portrait Session</option>
-                        <option value="Commercial">Commercial Work</option>
-                        <option value="Family">Family Session</option>
-                        <option value="Other">Other</option>
-                      </select>
-                      {errors.eventType && <span className="field-error">{errors.eventType}</span>}
-                    </div>
-
-                    <div className="form-group">
-                      <label>Message *</label>
-                      <textarea
-                        name="message"
-                        rows="5"
-                        value={formData.message}
-                        onChange={handleChange}
-                        className={errors.message ? 'error' : ''}
-                        placeholder="Tell me about your vision, event details, or any questions you have..."
-                      />
-                      {errors.message && <span className="field-error">{errors.message}</span>}
-                    </div>
-
-                    <button type="submit" className="btn-submit" disabled={sending}>
-                      {sending ? 'Sending...' : 'Send Message'}
-                    </button>
-                  </form>
-                )}
               </div>
             </div>
           </div>
-        </div>
-      </main>
-      <Footer />
+        </main>
+        <Footer />
       </motion.div>
     </>
   );

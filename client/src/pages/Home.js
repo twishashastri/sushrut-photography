@@ -109,19 +109,22 @@ function Home() {
       <Header />
       <main>
         {/* Hero Section - Slideshow from database */}
-        <section className="hero">
-          {heroImages.map((img, index) => (
+          <section className="hero">
+            {heroImages.map((img, index) => (
               <div key={img._id} className={`hero-slide ${index === currentSlide ? 'active' : ''}`}>
-                <img src={img.url} alt={`Sushrut Shastri Photography - Edmonton`} />
+                <img 
+                  src={img.url} 
+                  alt={`Sushrut Shastri Photography - Edmonton`}
+                  loading="lazy"
+                />
               </div>
-            ))
-          }
-          <div className="hero-overlay"></div>
-          <div className="hero-content">
-            <h1>Sushrut Shastri Photography</h1>
-            <p>Edmonton Wedding & Portrait Photographer • Capturing Alberta's Beautiful Moments</p>
-          </div>
-        </section>
+            ))}
+            <div className="hero-overlay"></div>
+            <div className="hero-content">
+              <h1>Sushrut Shastri Photography</h1>
+              <p>Edmonton Wedding & Portrait Photographer • Capturing Alberta's Beautiful Moments</p>
+            </div>
+          </section>
 
         {/* About Section */}
         <section className="about-section">
@@ -146,7 +149,7 @@ function Home() {
             <div className="events-grid">
               {events.map(event => (
                 <Link key={event._id} to={`/gallery/category/${event.name.toLowerCase()}`} className="event-card">
-                  <img src={categoryCovers[event.name]} alt={`Edmonton ${event.name} Photography`} />
+                  <img src={categoryCovers[event.name]} alt={`Edmonton ${event.name} Photography`} loading="lazy" />
                   <div className="event-overlay">
                     <h3>{event.name} Photography</h3>
                     <p>{event.imageCount || 0} photos • Edmonton, AB</p>

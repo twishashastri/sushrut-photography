@@ -143,7 +143,7 @@ function Gallery() {
               >
                 <img 
                   src={photo.url} 
-                  alt="" 
+                  alt={`Sushrut Shastri Photography - ${currentCategory || 'Gallery'}`}
                   loading="lazy"
                 />
               </motion.div>
