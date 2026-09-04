@@ -1,16 +1,19 @@
 const mongoose = require('mongoose');
 
 const photoSchema = new mongoose.Schema({
-  title: String,
+  title: {
+    type: String,
+    default: '',
+  },
   url: {
     type: String,
     required: true,
   },
   event: {
     type: String,
-    required: true,
+    default: 'Uncategorized',
   },
-  albumId:{
+  albumId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Album',
     default: null,
@@ -19,11 +22,21 @@ const photoSchema = new mongoose.Schema({
     type: String,
     default: 'Sushrut Shastri',
   },
-  description: String,
+  description: {
+    type: String,
+    default: '',
+  },
+  // Primary section (for backward compatibility)
   section: {
     type: String,
-    enum: ['hero', 'home-parallax', 'contact-parallax','events-parallax', 'featured', 'none'],
+    enum: ['hero', 'home-parallax', 'contact-parallax', 'events-parallax', 'featured', 'none'],
     default: 'none',
+  },
+  // NEW: Allow multiple sections for the same photo
+  sections: {
+    type: [String],
+    enum: ['hero', 'home-parallax', 'contact-parallax', 'events-parallax', 'featured', 'none'],
+    default: [],
   },
   order: {
     type: Number,

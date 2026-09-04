@@ -14,10 +14,66 @@ function AlbumDetail() {
   const [loading, setLoading] = useState(true);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  
+  // Store the font mappings once when album loads
+  const [fontMap, setFontMap] = useState({});
+
+  // Font list for random word rotation
+  const playfulFonts = [
+    'Pacifico',
+    'Dancing Script',
+    'Sacramento',
+    'Calligraffitti',
+    'Puppies Play',
+    'Great Vibes',
+    'Caveat',
+    'Ingrid Darling',
+    'Euphoria Script',
+    'WindSong'
+  ];
+
+  const getRandomFont = () => {
+    return playfulFonts[Math.floor(Math.random() * playfulFonts.length)];
+  };
+
+  // Generate font map for album title once
+  const generateFontMap = (title) => {
+    if (!title) return {};
+    const words = title.split(' ');
+    const map = {};
+    words.forEach((word, index) => {
+      map[index] = getRandomFont();
+    });
+    return map;
+  };
+
+  // Function to render album title with consistent fonts
+  const renderTitleWithFonts = (title) => {
+    if (!title) return null;
+    const words = title.split(' ');
+    
+    return words.map((word, index) => {
+      const font = fontMap[index] || getRandomFont();
+      const space = index < words.length - 1 ? ' ' : '';
+      
+      return (
+        <span key={index}>
+          <span style={{ 
+            fontFamily: `'${font}', cursive`, 
+            fontWeight: 'bold',
+            display: 'inline-block'
+          }}>
+            {word}
+          </span>
+          {space}
+        </span>
+      );
+    });
+  };
 
   useEffect(() => {
     loadAlbumData();
-    window.scrollTo(0, 0); // Scroll to top when album loads
+    window.scrollTo(0, 0);
   }, [slug]);
 
   const loadAlbumData = async () => {
@@ -27,6 +83,12 @@ function AlbumDetail() {
       const albumRes = await fetch(`${API_URL}/albums/${slug}`);
       const albumData = await albumRes.json();
       setAlbum(albumData);
+      
+      // Generate font map once when album loads
+      if (albumData.clientName) {
+        const map = generateFontMap(albumData.clientName);
+        setFontMap(map);
+      }
       
       // Load album photos
       const photosRes = await fetch(`${API_URL}/albums/${slug}/photos`);
@@ -129,7 +191,12 @@ function AlbumDetail() {
             <button onClick={() => navigate('/events')} className="album-back-button">
               ← Back to Events
             </button>
-            <h1>{album.clientName}</h1>
+            
+            {/* Album Title with Random Fonts per Word - FIXED on load */}
+            <h1 style={{ fontFamily: "'Abril Fatface', serif" }}>
+              {renderTitleWithFonts(album.clientName)}
+            </h1>
+            
             <div className="album-meta-info">
               <span className="album-category-badge">{album.category}</span>
               <span className="album-photo-count-badge">{photos.length} Photos</span>
@@ -151,7 +218,7 @@ function AlbumDetail() {
           ) : (
             <>
               <div className="album-stats-bar">
-                <p> Capturing beautiful moments from {album.clientName}</p>
+                <p>✨ Capturing beautiful moments from {album.clientName}</p>
               </div>
               
               <div className="album-photos-grid">

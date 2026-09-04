@@ -13,6 +13,62 @@ function EventsPage() {
   const [loading, setLoading] = useState(true);
   const ref = useRef(null);
   const [offset, setOffset] = useState(0);
+  
+  // Store font mappings for each album
+  const [fontMaps, setFontMaps] = useState({});
+
+  // Font list for random word rotation
+  const playfulFonts = [
+    'Pacifico',
+    'Dancing Script',
+    'Sacramento',
+    'Calligraffitti',
+    'Puppies Play',
+    'Great Vibes',
+    'Caveat',
+    'Ingrid Darling',
+    'Euphoria Script',
+    'WindSong'
+  ];
+
+  const getRandomFont = () => {
+    return playfulFonts[Math.floor(Math.random() * playfulFonts.length)];
+  };
+
+  // Generate font map for a title
+  const generateFontMap = (title) => {
+    if (!title) return {};
+    const words = title.split(' ');
+    const map = {};
+    words.forEach((word, index) => {
+      map[index] = getRandomFont();
+    });
+    return map;
+  };
+
+  // Function to render title with consistent fonts
+  const renderTitleWithFonts = (title, fontMap) => {
+    if (!title) return null;
+    const words = title.split(' ');
+    
+    return words.map((word, index) => {
+      const font = fontMap[index] || getRandomFont();
+      const space = index < words.length - 1 ? ' ' : '';
+      
+      return (
+        <span key={index}>
+          <span style={{ 
+            fontFamily: `'${font}', cursive`, 
+            fontWeight: 'bold',
+            display: 'inline-block'
+          }}>
+            {word}
+          </span>
+          {space}
+        </span>
+      );
+    });
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -35,6 +91,15 @@ function EventsPage() {
       const albumsData = await albumsRes.json();
       setAlbums(albumsData);
       
+      // Generate font maps for each album
+      const maps = {};
+      albumsData.forEach(album => {
+        if (album.clientName) {
+          maps[album._id] = generateFontMap(album.clientName);
+        }
+      });
+      setFontMaps(maps);
+      
       // Load parallax image
       const parallaxData = await fetchPhotosBySection('events-parallax');
       if (parallaxData.data.length > 0) {
@@ -51,7 +116,10 @@ function EventsPage() {
     return (
       <>
         <Header />
-        <div className="loading">Loading albums...</div>
+        <div className="loading">
+          <div className="loading-spinner"></div>
+          <p>Loading albums...</p>
+        </div>
         <Footer />
       </>
     );
@@ -59,10 +127,10 @@ function EventsPage() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.98 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.98 }}
-      transition={{ duration: 0.6, ease: "easeInOut" }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.6 }}
     >
       <Header />
       <main>
@@ -79,6 +147,7 @@ function EventsPage() {
           ) : (
             <div className="parallax-bg-placeholder"></div>
           )}
+          <div className="parallax-overlay"></div>
           <div className="parallax-content">
             <h1>Client Albums</h1>
             <p>Explore our collection of beautiful moments captured in Edmonton and across Alberta</p>
@@ -89,7 +158,7 @@ function EventsPage() {
         <div className="events-page-container">
           <div className="container">
             {albums.length === 0 ? (
-              <div className="loading" style={{ textAlign: 'center', padding: '60px 0' }}>
+              <div className="no-albums-message">
                 <h3>No albums yet</h3>
                 <p>Check back soon for client galleries!</p>
               </div>
@@ -103,11 +172,12 @@ function EventsPage() {
                   >
                     <div className="event-image">
                       <img 
-                        src={album.coverPhoto} 
-                        alt={album.clientName} loading="lazy"
+                        src={album.coverPhoto || '/default-album.jpg'} 
+                        alt={album.clientName}
+                        loading="lazy"
                       />
                       <div className="event-overlay-large">
-                        <h2>{album.clientName}</h2>
+                        <h2>{renderTitleWithFonts(album.clientName, fontMaps[album._id] || {})}</h2>
                         <p>{album.category} • {album.photoCount || 0} photos →</p>
                         {album.description && <p className="album-desc">{album.description}</p>}
                       </div>

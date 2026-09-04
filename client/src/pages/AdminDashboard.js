@@ -46,6 +46,14 @@ function AdminDashboard() {
     albumId: ''
   });
 
+  // ============================================================
+  // NEW: Assign Existing Photo to Section
+  // ============================================================
+  const [showAssignSection, setShowAssignSection] = useState(false);
+  const [allPhotosForAssignment, setAllPhotosForAssignment] = useState([]);
+  const [selectedPhotoForAssignment, setSelectedPhotoForAssignment] = useState('');
+  const [selectedSectionForAssignment, setSelectedSectionForAssignment] = useState('');
+
   const navigate = useNavigate();
 
   /**
@@ -292,9 +300,9 @@ function AdminDashboard() {
   const handleUpload = async (e) => {
     e.preventDefault();
     
-    // Validation
-    if (!uploadData.event) {
-      showMessage('error', 'Please select a category');
+    // Validation - Category is now optional for parallax images
+    if (!uploadData.event && uploadData.section === 'none') {
+      showMessage('error', 'Please select a category or a display location');
       return;
     }
     if (selectedFiles.length === 0) {
@@ -310,7 +318,7 @@ function AdminDashboard() {
       formData.append('images', file);
     });
     
-    // Append metadata
+    // Append metadata (event can be empty for parallax)
     formData.append('event', uploadData.event);
     formData.append('photographer', uploadData.photographer);
     formData.append('section', uploadData.section);
@@ -394,6 +402,55 @@ function AdminDashboard() {
       'events-parallax': 'Events Parallax'
     };
     return sections[section] || section;
+  };
+
+  // ============================================================
+  // NEW: Load all photos for assignment
+  // ============================================================
+  const loadAllPhotosForAssignment = async () => {
+    try {
+      const { data } = await fetchPhotos();
+      setAllPhotosForAssignment(data);
+    } catch (error) {
+      console.error('Error loading photos:', error);
+      showMessage('error', 'Failed to load photos');
+    }
+  };
+
+  // ============================================================
+  // NEW: Assign existing photo to a section
+  // ============================================================
+  const handleAssignPhotoToSection = async () => {
+    if (!selectedPhotoForAssignment || !selectedSectionForAssignment) {
+      showMessage('error', 'Please select both a photo and a section');
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_URL}/photos/${selectedPhotoForAssignment}/assign-section`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': token,
+        },
+        body: JSON.stringify({ section: selectedSectionForAssignment }),
+      });
+
+      if (response.ok) {
+        showMessage('success', `Photo assigned to "${getSectionName(selectedSectionForAssignment)}" successfully!`);
+        setSelectedPhotoForAssignment('');
+        setSelectedSectionForAssignment('');
+        await loadPhotos();
+        await loadEvents();
+      } else {
+        const error = await response.json();
+        showMessage('error', 'Failed to assign photo: ' + (error.message || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Error assigning photo:', error);
+      showMessage('error', 'Failed to assign photo');
+    }
   };
 
   // Calculate statistics for dashboard overview
@@ -529,21 +586,23 @@ function AdminDashboard() {
         {activeTab === 'upload' && (
           <div className="admin-form">
             <h3>Upload New Photos</h3>
+            <p style={{ color: '#666', fontSize: '13px', marginBottom: '15px' }}>
+              For parallax images, you can leave "Category" empty. For gallery photos, select a category.
+            </p>
             <form onSubmit={handleUpload}>
-              {/* Category Selection */}
+              {/* Category Selection - Now Optional */}
               <div className="form-group">
-                <label>Select Category *</label>
+                <label>Select Category (Optional for parallax)</label>
                 <select
                   value={uploadData.event}
                   onChange={(e) => setUploadData({ ...uploadData, event: e.target.value })}
-                  required
                 >
-                  <option value="">-- Choose a category --</option>
+                  <option value="">-- No Category (Parallax/Section images) --</option>
                   {events.map(event => (
                     <option key={event._id} value={event.name}>{event.name}</option>
                   ))}
                 </select>
-                <small>Which category do these photos belong to?</small>
+                <small>Only required for gallery photos. Leave empty for parallax images.</small>
               </div>
 
               {/* Album Assignment (Optional) */}
@@ -756,6 +815,110 @@ function AdminDashboard() {
             )}
           </div>
         )}
+
+        {/* ============================================================
+            Assign Existing Photo to Section
+            ============================================================ */}
+        <div className="admin-section" style={{ marginTop: '30px' }}>
+          <h3>Assign Existing Photo to Section</h3>
+          <p style={{ color: '#666', fontSize: '13px', marginBottom: '15px' }}>
+            Use an existing photo for hero slideshow, parallax backgrounds, or featured sections without uploading duplicates.
+          </p>
+          
+          <div className="form-row">
+            <div className="form-group">
+              <label>Select Photo</label>
+              <select
+                className="form-control"
+                value={selectedPhotoForAssignment}
+                onChange={(e) => setSelectedPhotoForAssignment(e.target.value)}
+                onClick={() => {
+                  if (allPhotosForAssignment.length === 0) {
+                    loadAllPhotosForAssignment();
+                  }
+                }}
+              >
+                <option value="">-- Select a photo --</option>
+                {allPhotosForAssignment.map(photo => (
+                  <option key={photo._id} value={photo._id}>
+                    {photo.event || 'Uncategorized'} - {photo.url.split('/').pop().slice(0, 20)}...
+                  </option>
+                ))}
+              </select>
+              <small>Click the dropdown to load photos</small>
+            </div>
+
+            <div className="form-group">
+              <label>Assign to Section</label>
+              <select
+                className="form-control"
+                value={selectedSectionForAssignment}
+                onChange={(e) => setSelectedSectionForAssignment(e.target.value)}
+              >
+                <option value="">-- Choose section --</option>
+                <option value="hero">Hero Slideshow</option>
+                <option value="home-parallax">Home Parallax</option>
+                <option value="contact-parallax">Contact Parallax</option>
+                <option value="events-parallax">Events Parallax</option>
+                <option value="featured">Featured</option>
+              </select>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+            <button
+              className="btn btn-primary"
+              onClick={handleAssignPhotoToSection}
+              disabled={!selectedPhotoForAssignment || !selectedSectionForAssignment}
+            >
+              Assign Photo to Section
+            </button>
+            <button
+              className="btn"
+              style={{ background: '#f0f0f0', color: '#333' }}
+              onClick={() => {
+                setShowAssignSection(!showAssignSection);
+                if (!showAssignSection) loadAllPhotosForAssignment();
+              }}
+            >
+              {showAssignSection ? 'Hide Photos' : 'Show All Photos'}
+            </button>
+          </div>
+
+          {/* Preview of all photos */}
+          {showAssignSection && (
+            <div className="photos-grid" style={{ marginTop: '15px', maxHeight: '300px', overflow: 'auto' }}>
+              {allPhotosForAssignment.slice(0, 20).map(photo => (
+                <div 
+                  key={photo._id} 
+                  className="photo-card" 
+                  style={{ 
+                    height: 'auto',
+                    border: selectedPhotoForAssignment === photo._id ? '2px solid #1a1a1a' : '1px solid #eee',
+                    cursor: 'pointer'
+                  }}
+                  onClick={() => {
+                    setSelectedPhotoForAssignment(photo._id);
+                    // Scroll to show selected
+                  }}
+                >
+                  <img src={photo.url} alt="" style={{ height: '100px', width: '100%', objectFit: 'cover' }} />
+                  <div className="photo-info" style={{ padding: '5px' }}>
+                    <p style={{ fontSize: '10px', margin: 0 }}>{photo.event || 'Uncategorized'}</p>
+                    <p style={{ fontSize: '10px', color: '#999', margin: 0 }}>
+                      {photo.section && photo.section !== 'none' ? getSectionName(photo.section) : 'No section'}
+                    </p>
+                  </div>
+                </div>
+              ))}
+              {allPhotosForAssignment.length > 20 && (
+                <p style={{ textAlign: 'center', padding: '10px', color: '#999', fontSize: '12px' }}>
+                  Showing 20 of {allPhotosForAssignment.length} photos. Use the dropdown to search.
+                </p>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Cover Photo Selection Modal */}

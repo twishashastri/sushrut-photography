@@ -32,20 +32,24 @@ const upload = multer({
 
 // Upload multiple photos
 router.post('/photos', auth, upload.array('images', 10), async (req, res) => {
-  
   try {
     const { event, photographer } = req.body;
     const files = req.files;
+    const section = req.body.section || 'none';
+    const albumId = req.body.albumId || null;
     
     if (!files || files.length === 0) {
       return res.status(400).json({ message: 'No files uploaded' });
     }
     
-    if (!event) {
-      return res.status(400).json({ message: 'Event is required' });
+    // Allow upload without event if it's a parallax/section image
+    const isParallax = section && section !== 'none';
+    
+    if (!event && !isParallax) {
+      return res.status(400).json({ message: 'Event is required for gallery photos' });
     }
     
-    console.log(`Processing ${files.length} files for event: ${event}`);
+    console.log(`Processing ${files.length} files for ${event || 'parallax'}`);
     
     const photos = [];
     
@@ -67,16 +71,18 @@ router.post('/photos', auth, upload.array('images', 10), async (req, res) => {
         
         console.log(`Uploaded to Cloudinary:`, result.secure_url);
         
-        // Save to database
+        // Save to database - event is optional for parallax
         const photo = new Photo({
           url: result.secure_url,
-          event,
-          albumId: req.body.albumId || null,
+          event: event || 'Uncategorized',
+          albumId: albumId,
           photographer: photographer || 'Sushrut Shastri',
           location: 'Edmonton, Alberta',
           isHero: req.body.isHero === 'true', 
           isFeatured: req.body.isFeatured === 'true', 
-          section: req.body.section || 'none',
+          section: section,
+          // Store all sections this photo belongs to
+          sections: section !== 'none' ? [section] : [],
         });
         
         await photo.save();
@@ -85,12 +91,11 @@ router.post('/photos', auth, upload.array('images', 10), async (req, res) => {
         
       } catch (uploadError) {
         console.error(`Failed to upload ${file.originalname}:`, uploadError);
-        
       }
     }
     
-    // Update event image count 
-    if (photos.length > 0 && !req.body.albumId) {
+    // Update event image count (only if event exists and not parallax)
+    if (photos.length > 0 && event && !albumId) {
       await Event.findOneAndUpdate(
         { name: event },
         { $inc: { imageCount: photos.length } }
@@ -98,14 +103,14 @@ router.post('/photos', auth, upload.array('images', 10), async (req, res) => {
     }
     
     // Update album photo count if photos were added to an album
-    if (photos.length > 0 && req.body.albumId) {
+    if (photos.length > 0 && albumId) {
       await Album.findByIdAndUpdate(
-        req.body.albumId,
+        albumId,
         { $inc: { photoCount: photos.length } }
       );
       
       // Set cover photo if album doesn't have one
-      const album = await Album.findById(req.body.albumId);
+      const album = await Album.findById(albumId);
       if (album && !album.coverPhoto && photos.length > 0) {
         album.coverPhoto = photos[0].url;
         await album.save();

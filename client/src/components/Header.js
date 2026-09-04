@@ -1,8 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const location = useLocation();
+
+  // Check if current path matches the link
+  const isActive = (path) => {
+    return location.pathname === path ? 'active' : '';
+  };
 
   // Prevent body scroll when menu is open
   useEffect(() => {
@@ -47,10 +53,10 @@ function Header() {
         </Link>
         
         <div className="nav-links">
-          <Link to="/">Home</Link>
-          <Link to="/gallery">Gallery</Link>
-          <Link to="/events">Events</Link>
-          <Link to="/contact">Contact</Link>
+          <Link to="/" className={isActive('/')}>Home</Link>
+          <Link to="/gallery" className={isActive('/gallery')}>Gallery</Link>
+          <Link to="/events" className={isActive('/events')}>Events</Link>
+          <Link to="/contact" className={isActive('/contact')}>Contact</Link>
         </div>
         
         {/* Hamburger Button - Only visible when menu is closed */}
@@ -79,10 +85,10 @@ function Header() {
           ✕
         </button>
         <div className="mobile-nav-links">
-          <Link to="/" onClick={closeMenu}>Home</Link>
-          <Link to="/gallery" onClick={closeMenu}>Gallery</Link>
-          <Link to="/events" onClick={closeMenu}>Events</Link>
-          <Link to="/contact" onClick={closeMenu}>Contact</Link>
+          <Link to="/" className={isActive('/')} onClick={closeMenu}>Home</Link>
+          <Link to="/gallery" className={isActive('/gallery')} onClick={closeMenu}>Gallery</Link>
+          <Link to="/events" className={isActive('/events')} onClick={closeMenu}>Events</Link>
+          <Link to="/contact" className={isActive('/contact')} onClick={closeMenu}>Contact</Link>
         </div>
       </div>
     </header>

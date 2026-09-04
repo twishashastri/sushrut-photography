@@ -19,10 +19,15 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Get photos by section (updated to check sections array too)
 router.get('/section/:section', async (req, res) => {
   try {
+    const { section } = req.params;
     const photos = await Photo.find({ 
-      section: req.params.section 
+      $or: [
+        { section: section },
+        { sections: { $in: [section] } }
+      ]
     }).sort({ order: 1, createdAt: -1 });
     res.json(photos);
   } catch (error) {
@@ -30,6 +35,7 @@ router.get('/section/:section', async (req, res) => {
   }
 });
 
+// Get photos by category
 router.get('/category/:category', async (req, res) => {
   try {
     const photos = await Photo.find({ 
@@ -49,6 +55,84 @@ router.get('/event/:event', async (req, res) => {
     }).sort({ createdAt: -1 });
     res.json(photos);
   } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// ============================================================
+// NEW: Assign photo to a section (no duplicate upload needed)
+// ============================================================
+router.put('/:id/assign-section', auth, async (req, res) => {
+  try {
+    const { section } = req.body;
+    const photo = await Photo.findById(req.params.id);
+    
+    if (!photo) {
+      return res.status(404).json({ message: 'Photo not found' });
+    }
+    
+    // Validate section
+    const validSections = ['hero', 'home-parallax', 'contact-parallax', 'events-parallax', 'featured', 'none'];
+    if (!validSections.includes(section)) {
+      return res.status(400).json({ message: 'Invalid section' });
+    }
+    
+    // Update the primary section
+    photo.section = section;
+    
+    // Add to sections array if not already present
+    if (section !== 'none' && photo.sections) {
+      if (!photo.sections.includes(section)) {
+        photo.sections.push(section);
+      }
+    }
+    
+    await photo.save();
+    
+    res.json({ 
+      success: true,
+      message: `Photo assigned to "${section}" successfully`,
+      photo: photo 
+    });
+    
+  } catch (error) {
+    console.error('Assign section error:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// ============================================================
+// NEW: Remove photo from a section
+// ============================================================
+router.put('/:id/remove-section', auth, async (req, res) => {
+  try {
+    const { section } = req.body;
+    const photo = await Photo.findById(req.params.id);
+    
+    if (!photo) {
+      return res.status(404).json({ message: 'Photo not found' });
+    }
+    
+    // Remove from sections array
+    if (photo.sections) {
+      photo.sections = photo.sections.filter(s => s !== section);
+    }
+    
+    // If the primary section matches, reset it
+    if (photo.section === section) {
+      photo.section = photo.sections.length > 0 ? photo.sections[0] : 'none';
+    }
+    
+    await photo.save();
+    
+    res.json({ 
+      success: true,
+      message: `Photo removed from "${section}" successfully`,
+      photo: photo 
+    });
+    
+  } catch (error) {
+    console.error('Remove section error:', error);
     res.status(500).json({ message: error.message });
   }
 });
@@ -82,11 +166,13 @@ router.delete('/:id', auth, async (req, res) => {
     // Delete from MongoDB
     await Photo.findByIdAndDelete(req.params.id);
     
-    // Update event image count
-    await Event.findOneAndUpdate(
-      { name: photo.event },
-      { $inc: { imageCount: -1 } }
-    );
+    // Update event image count (only if event exists)
+    if (photo.event && photo.event !== 'Uncategorized') {
+      await Event.findOneAndUpdate(
+        { name: photo.event },
+        { $inc: { imageCount: -1 } }
+      );
+    }
     
     res.json({ message: 'Photo deleted from database and Cloudinary' });
     

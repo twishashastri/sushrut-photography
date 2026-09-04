@@ -123,41 +123,26 @@ function Contact() {
     setSubmitError('');
     
     try {
-      // Get EmailJS credentials from environment variables
       const serviceId = process.env.REACT_APP_EMAILJS_SERVICE_ID;
       const templateId = process.env.REACT_APP_EMAILJS_TEMPLATE_ID;
       const autoReplyTemplateId = process.env.REACT_APP_EMAILJS_AUTO_REPLY_TEMPLATE_ID;
       const publicKey = process.env.REACT_APP_EMAILJS_PUBLIC_KEY;
       
-      // Validate that all required variables are set
       if (!serviceId || !templateId || !publicKey) {
-        console.error('Missing EmailJS environment variables:', {
-          serviceId: !!serviceId,
-          templateId: !!templateId,
-          publicKey: !!publicKey
-        });
+        console.error('Missing EmailJS environment variables');
         setSubmitError('Email configuration error. Please contact the website owner.');
         setSending(false);
         return;
       }
       
-      // Prepare template parameters - MUST MATCH YOUR TEMPLATE VARIABLES EXACTLY!
       const templateParams = {
         from_name: formData.name,
         from_email: formData.email,
         phone: formData.phone || 'Not provided',
         event_type: formData.eventType,
         message: formData.message,
-        // If your template uses different variable names, update these:
-        // to_email: 'sushrutshastriphotography@gmail.com' // Only if your template has 'to_email'
       };
       
-      console.log('Sending email with params:', templateParams);
-      console.log('Service ID:', serviceId);
-      console.log('Template ID:', templateId);
-      console.log('Public Key exists:', !!publicKey);
-      
-      // Send notification to photographer (client)
       const response = await emailjs.send(
         serviceId,
         templateId,
@@ -165,10 +150,7 @@ function Contact() {
         publicKey
       );
       
-      console.log('EmailJS response:', response);
-      
       if (response.status === 200) {
-        // If auto-reply template exists and is configured, send thank-you to customer
         if (autoReplyTemplateId && autoReplyTemplateId !== 'undefined') {
           try {
             const replyParams = {
@@ -176,11 +158,8 @@ function Contact() {
               from_email: formData.email,
               event_type: formData.eventType,
               message: formData.message,
-              // For auto-reply, send to the person who filled the form
               to_email: formData.email
             };
-            
-            console.log('Sending auto-reply with params:', replyParams);
             
             await emailjs.send(
               serviceId,
@@ -188,17 +167,12 @@ function Contact() {
               replyParams,
               publicKey
             );
-            console.log('Auto-reply sent successfully');
           } catch (autoReplyError) {
             console.error('Auto-reply failed:', autoReplyError);
-            // Don't fail the whole form if auto-reply fails
           }
-        } else {
-          console.log('No auto-reply template configured, skipping...');
         }
         
         setSubmitted(true);
-        // Reset form
         setFormData({
           name: '',
           email: '',
@@ -211,15 +185,12 @@ function Contact() {
       }
     } catch (error) {
       console.error('Error sending message:', error);
-      
-      // Better error message based on status
       let errorMessage = 'Failed to send message. Please try again.';
       if (error.status === 422) {
         errorMessage = 'Email configuration error. Please check your template variables match the code.';
       } else if (error.text) {
         errorMessage = `Error: ${error.text}`;
       }
-      
       setSubmitError(errorMessage);
     } finally {
       setSending(false);
@@ -242,14 +213,14 @@ function Contact() {
   return (
     <>
       <motion.div
-        initial={{ opacity: 0, scale: 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.98 }}
-        transition={{ duration: 0.6, ease: "easeInOut" }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.6 }}
       >
         <Header />
         <main>
-          {/* Parallax Hero Section */}
+          {/* Parallax Hero Section with Playful Fonts */}
           <section className="parallax-section contact-hero" ref={ref}>
             {parallaxImage ? (
               <div 
@@ -262,6 +233,7 @@ function Contact() {
             ) : (
               <div className="parallax-bg-placeholder"></div>
             )}
+            <div className="parallax-overlay"></div>
             <div className="parallax-content">
               <h1>Let's Create Together</h1>
               <p>Available for weddings, portraits, and commercial work in Edmonton and across Alberta.</p>
@@ -284,6 +256,7 @@ function Contact() {
             <div className="contact-form-overlay"></div>
             <div className="container">
               <div className="contact-grid">
+                {/* Contact Info */}
                 <div className="contact-info">
                   <h2>Get in Touch</h2>
                   <p>Based in Edmonton, Alberta, I'm available for photography sessions throughout Alberta. Whether you're planning a wedding, need professional portraits, or have a commercial project, I'd love to hear from you.</p>
@@ -307,12 +280,13 @@ function Contact() {
                     </div>
                   </div>
 
-                  <div className="social-links">
-                    <a href="https://www.instagram.com/sushrutshastriphotography/" target="_blank" rel="noopener noreferrer" className="social-link">Instagram</a>
-                    <a href="https://www.facebook.com/people/Sushrut-Shastri-Photography/61580716311894/" target="_blank" rel="noopener noreferrer" className="social-link">Facebook</a>
+                  <div className="contact-social-links">
+                    <a href="https://www.instagram.com/sushrutshastriphotography/" target="_blank" rel="noopener noreferrer" className="contact-social-link">Instagram</a>
+                    <a href="https://www.facebook.com/people/Sushrut-Shastri-Photography/61580716311894/" target="_blank" rel="noopener noreferrer" className="contact-social-link">Facebook</a>
                   </div>
                 </div>
 
+                {/* Contact Form */}
                 <div className="contact-form-card">
                   {submitted ? (
                     <div className="success-message">
