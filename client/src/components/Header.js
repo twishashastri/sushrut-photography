@@ -49,7 +49,7 @@ function Header() {
     <header className="header">
       <nav className="nav container">
         <Link to="/" className="logo" onClick={closeMenu}>
-          <img src="/logo.svg" className="logo-img" alt="Sushrut Shastri Photography" />
+          <img src="/logo.png" className="logo-img" alt="Sushrut Shastri Photography" />
         </Link>
         
         <div className="nav-links">

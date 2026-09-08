@@ -14,6 +14,9 @@ function Home() {
   const [parallaxImage, setParallaxImage] = useState('');
   const [loading, setLoading] = useState(true);
   
+  // Dynamic marquee speed based on device
+  const [marqueeSpeed, setMarqueeSpeed] = useState(40);
+  
   // Refs for scroll effects
   const ref = useRef(null);
   const [offset, setOffset] = useState(0);
@@ -51,6 +54,26 @@ function Home() {
       boxShadow: 'none'
     });
   };
+
+  // Update marquee speed based on screen size
+  useEffect(() => {
+    const updateSpeed = () => {
+      const width = window.innerWidth;
+      if (width < 480) {
+        setMarqueeSpeed(16); // Very fast on small phones
+      } else if (width < 768) {
+        setMarqueeSpeed(22); // Fast on tablets
+      } else if (width < 992) {
+        setMarqueeSpeed(30); // Medium on tablets
+      } else {
+        setMarqueeSpeed(40); // Normal on desktop
+      }
+    };
+    
+    updateSpeed();
+    window.addEventListener('resize', updateSpeed);
+    return () => window.removeEventListener('resize', updateSpeed);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -135,10 +158,14 @@ function Home() {
       >
         <Header />
         <main>
-          {/* ===== HERO SECTION - MARQUEE STYLE ===== */}
+          {/* ===== HERO SECTION - MARQUEE STYLE WITH DYNAMIC SPEED ===== */}
           <section className="hero-marquee">
-            <div className="hero-marquee-track">
-              {[...heroImages, ...heroImages, ...heroImages].map((img, index) => (
+            <div 
+              className="hero-marquee-track"
+              style={{ animationDuration: `${marqueeSpeed}s` }}
+            >
+              {/* 6 copies for seamless loop on all devices */}
+              {[...heroImages, ...heroImages, ...heroImages, ...heroImages, ...heroImages, ...heroImages].map((img, index) => (
                 <div key={index} className="hero-marquee-slide">
                   <img 
                     src={img.url} 
