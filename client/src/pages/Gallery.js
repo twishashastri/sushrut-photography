@@ -318,9 +318,6 @@ function Gallery() {
                           alt={photo.event || 'Gallery image'}
                           loading="lazy"
                         />
-                        {photo.event && (
-                          <span className="gallery-tag">{photo.event}</span>
-                        )}
                       </div>
                     </motion.div>
                   ))}

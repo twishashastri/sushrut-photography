@@ -2,9 +2,7 @@
    FONTS - PLAYFUL & UNIQUE
    ============================================================ */
 
-/* Font Variables */
 :root {
-  /* Playful Script Fonts */
   --font-pacifico: 'Pacifico', cursive;
   --font-dancing: 'Dancing Script', cursive;
   --font-sacramento: 'Sacramento', cursive;
@@ -15,24 +13,17 @@
   --font-ingrid: 'Ingrid Darling', cursive;
   --font-euphoria: 'Euphoria Script', cursive;
   --font-windsong: 'WindSong', cursive;
-  
-  /* Bold & Dramatic */
   --font-abril: 'Abril Fatface', serif;
   --font-anton: 'Anton', sans-serif;
-  
-  /* Elegant Fonts */
   --font-playfair: 'Playfair Display', serif;
   --font-cinzel: 'Cinzel', serif;
   --font-syne: 'Syne', sans-serif;
   --font-fraunces: 'Fraunces', serif;
-  
-  /* Clean Modern Fonts */
   --font-inter: 'Inter', sans-serif;
   --font-space: 'Space Grotesk', sans-serif;
   --font-jakarta: 'Plus Jakarta Sans', sans-serif;
   --font-montserrat: 'Montserrat', sans-serif;
   
-  /* Colors & Spacing */
   --primary: #1A1A1A;
   --secondary: #6B6B6B;
   --light: #F5F5F5;
@@ -47,7 +38,6 @@
   --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.12);
 }
 
-/* ===== RESET & BASE ===== */
 * {
   box-sizing: border-box;
   font-family: var(--font-inter);
@@ -133,7 +123,6 @@ a {
   border-bottom: 2px solid white;
 }
 
-/* Mobile Menu */
 .mobile-menu-btn {
   display: none;
   background: none;
@@ -247,10 +236,9 @@ body.menu-open {
 }
 
 /* ============================================================
-   GLASS BUTTON STYLES - ONLY FOR SPECIFIC BUTTONS
+   GLASS BUTTON STYLES
    ============================================================ */
 
-/* Hero Buttons - Glass Effect */
 .hero-btn {
   display: inline-block;
   padding: 14px 36px;
@@ -272,7 +260,6 @@ body.menu-open {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Hero Primary - Glass */
 .hero-btn.primary {
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(12px);
@@ -300,23 +287,6 @@ body.menu-open {
   transition-duration: 0.1s;
 }
 
-.hero-btn.primary::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-  transition: left 0.6s ease;
-  pointer-events: none;
-}
-
-.hero-btn.primary:hover::before {
-  left: 100%;
-}
-
-/* Hero Secondary - Glass */
 .hero-btn.secondary {
   background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(12px);
@@ -344,23 +314,6 @@ body.menu-open {
   transition-duration: 0.1s;
 }
 
-.hero-btn.secondary::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
-  transition: left 0.6s ease;
-  pointer-events: none;
-}
-
-.hero-btn.secondary:hover::before {
-  left: 100%;
-}
-
-/* About Button - Glass */
 .about-btn {
   display: inline-block;
   padding: 14px 32px;
@@ -401,23 +354,6 @@ body.menu-open {
   transition-duration: 0.1s;
 }
 
-.about-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
-  transition: left 0.6s ease;
-  pointer-events: none;
-}
-
-.about-btn:hover::before {
-  left: 100%;
-}
-
-/* Contact Social Links - Glass */
 .contact-social-link {
   padding: 12px 30px;
   background: rgba(255, 255, 255, 0.8);
@@ -459,23 +395,6 @@ body.menu-open {
   transition-duration: 0.1s;
 }
 
-.contact-social-link::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.6s ease;
-  pointer-events: none;
-}
-
-.contact-social-link:hover::before {
-  left: 100%;
-}
-
-/* Submit Button - Glass */
 .btn-submit {
   width: 100%;
   padding: 16px 32px;
@@ -521,27 +440,7 @@ body.menu-open {
   transform: none !important;
 }
 
-.btn-submit::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
-  transition: left 0.6s ease;
-  pointer-events: none;
-}
-
-.btn-submit:hover:not(:disabled)::before {
-  left: 100%;
-}
-
-/* ============================================================
-   MOBILE TOUCH ENHANCEMENTS FOR GLASS BUTTONS
-   ============================================================ */
-
-/* Touch devices - Larger tap targets & remove hover on touch */
+/* Touch Enhancements */
 @media (hover: none) and (pointer: coarse) {
   .hero-btn,
   .about-btn,
@@ -553,7 +452,6 @@ body.menu-open {
     font-size: 1rem;
   }
   
-  /* Remove hover effects on touch, keep active/click */
   .hero-btn:hover,
   .about-btn:hover,
   .contact-social-link:hover,
@@ -561,7 +459,6 @@ body.menu-open {
     transform: none;
   }
   
-  /* Active state for touch - shows feedback */
   .hero-btn:active,
   .about-btn:active,
   .contact-social-link:active,
@@ -644,12 +541,8 @@ body.menu-open {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
-/* 
-.hero-marquee:hover .hero-marquee-track {
-  animation-play-state: paused;
-}
 
-============================================================
+/* ============================================================
    ABOUT SECTION
    ============================================================ */
 
@@ -794,29 +687,9 @@ body.menu-open {
   animation: floatParticle 6s ease-in-out infinite;
 }
 
-.particle-1 {
-  width: 8px;
-  height: 8px;
-  top: 15%;
-  left: 10%;
-  animation-delay: 0s;
-}
-
-.particle-2 {
-  width: 6px;
-  height: 6px;
-  bottom: 20%;
-  right: 15%;
-  animation-delay: 2s;
-}
-
-.particle-3 {
-  width: 10px;
-  height: 10px;
-  top: 50%;
-  left: 80%;
-  animation-delay: 4s;
-}
+.particle-1 { width: 8px; height: 8px; top: 15%; left: 10%; animation-delay: 0s; }
+.particle-2 { width: 6px; height: 6px; bottom: 20%; right: 15%; animation-delay: 2s; }
+.particle-3 { width: 10px; height: 10px; top: 50%; left: 80%; animation-delay: 4s; }
 
 @keyframes floatParticle {
   0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
@@ -1707,13 +1580,8 @@ body.menu-open {
   transition: opacity 0.3s ease;
 }
 
-.lightbox-prev {
-  left: -70px;
-}
-
-.lightbox-next {
-  right: -70px;
-}
+.lightbox-prev { left: -70px; }
+.lightbox-next { right: -70px; }
 
 .lightbox-prev:hover,
 .lightbox-next:hover {
@@ -1814,7 +1682,6 @@ body.menu-open {
   align-items: center;
   gap: 16px;
   padding: 16px 22px;
-  background: white;
   border-radius: 14px;
   box-shadow: 0 2px 15px rgba(0, 0, 0, 0.04);
   transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1840,10 +1707,10 @@ body.menu-open {
   font-size: 18px;
 }
 
-.contact-details div:nth-child(1)::before { content: '📍'; background: #f0f0f0; text-align: center; line-height: 40px; }
-.contact-details div:nth-child(2)::before { content: '📧'; background: #f0f0f0; text-align: center; line-height: 40px; }
-.contact-details div:nth-child(3)::before { content: '📞'; background: #f0f0f0; text-align: center; line-height: 40px; }
-.contact-details div:nth-child(4)::before { content: '🕐'; background: #f0f0f0; text-align: center; line-height: 40px; }
+.contact-details div:nth-child(1)::before { content: '📍'; background: #ffffff4a; text-align: center; line-height: 40px; }
+.contact-details div:nth-child(2)::before { content: '📧'; background: #ffffff4a; text-align: center; line-height: 40px; }
+.contact-details div:nth-child(3)::before { content: '📞'; background: #ffffff4a; text-align: center; line-height: 40px; }
+.contact-details div:nth-child(4)::before { content: '🕐'; background: #ffffff4a; text-align: center; line-height: 40px; }
 
 .contact-details strong {
   display: block;
@@ -1858,7 +1725,7 @@ body.menu-open {
 
 .contact-details p {
   margin: 0;
-  color: #1a1a1a;
+  color: var(--light);
   font-size: 15px;
   font-weight: 500;
   font-family: var(--font-inter);
@@ -2859,18 +2726,29 @@ textarea.form-control {
    RESPONSIVE - TABLETS & MOBILE
    ============================================================ */
 
-/* Tablets and below */
-@media (max-width: 992px) {
+/* Tablets and below (1024px) */
+@media (max-width: 1024px) {
+  .container { padding: 0 20px; }
+  .events-grid { grid-template-columns: repeat(3, 1fr); }
   .gallery-masonry { column-count: 2; }
-  .contact-grid { grid-template-columns: 1fr; gap: 40px; }
-  .contact-info { padding: 0; }
   .gallery-header-modern { height: 40vh; min-height: 350px; }
   .gallery-header-inner h1 { font-size: 3rem; }
   .marquee-item { width: 220px; height: 160px; }
   .marquee-track { gap: 16px; }
+  .album-photos-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+  .album-photo-wrapper img { height: 300px; }
+  .contact-grid { grid-template-columns: 1fr; gap: 40px; }
+  .contact-info { padding: 0; }
+  .contact-info h2 { color: var(--light); }
+  .contact-info > p { color: var(--light); }
+  .admin-tabs { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
+  .admin-tab { flex: 0 0 auto; white-space: nowrap; }
+  .dashboard-grid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 30px; }
+  .stat-item h3 { font-size: 2.5rem; }
 }
 
-/* Mobile Landscape & Tablets */
+/* Mobile Landscape & Tablets (768px) */
 @media (max-width: 768px) {
   /* Navigation */
   .nav-links { display: none; }
@@ -2882,6 +2760,7 @@ textarea.form-control {
   h1 { font-size: 28px !important; }
   h2 { font-size: 22px !important; }
   h3 { font-size: 18px !important; }
+  h4 { font-size: 16px !important; }
   p { font-size: 15px !important; line-height: 1.6 !important; }
   
   /* Container */
@@ -2893,7 +2772,7 @@ textarea.form-control {
   .hero-marquee-track { animation-duration: 25s; }
   .hero-title { font-size: 2.8rem !important; }
   .hero-buttons { flex-direction: column; align-items: center; }
-  .hero-btn { width: 100%; max-width: 280px; text-align: center; }
+  .hero-btn { width: 100%; max-width: 280px; text-align: center; padding: 12px 28px; font-size: 13px; }
   
   /* About */
   .about-grid { grid-template-columns: 1fr; gap: 30px; }
@@ -2941,18 +2820,19 @@ textarea.form-control {
   
   /* Contact */
   .contact-hero { height: 40vh; min-height: 300px; }
-  .contact-hero .parallax-content h1 { font-size: 2.5rem; }
-  .contact-info h2 { font-size: 2.2rem !important; }
-  .contact-info > p { font-size: 0.95rem; }
-  .contact-details p { font-size: 14px !important; }
-  .contact-form-card { padding: 30px 24px 35px 24px !important; }
-  .contact-form-parallax { padding: 40px 0; }
-  .contact-social-links { flex-wrap: wrap; }
-  .contact-social-link { padding: 10px 24px; font-size: 13px; }
+  .contact-hero .parallax-content h1 { font-size: 2.5rem !important; }
+  .contact-info h2 { font-size: 1.8rem !important; }
+  .contact-info > p { font-size: 14px !important; }
+  .contact-details p { font-size: 13px !important; }
+  .contact-form-card { padding: 25px 18px 30px 18px !important; }
+  .contact-form-parallax { padding: 40px 0 !important; }
+  .contact-social-links { flex-wrap: wrap !important; }
+  .contact-social-link { padding: 10px 24px; font-size: 13px !important; }
   
   /* Form */
-  .form-group input, .form-group select { padding: 12px 16px; font-size: 15px; }
-  .form-group textarea { padding: 12px 16px; font-size: 15px; }
+  .form-group input, .form-group select { padding: 12px 16px; font-size: 15px !important; }
+  .form-group label {font-size: 12px !important; }
+  .form-group textarea { padding: 12px 16px; font-size: 15px !important; }
   .btn-submit { padding: 14px 24px; font-size: 15px; }
   .form-row { grid-template-columns: 1fr; gap: 0; }
   
@@ -3010,7 +2890,7 @@ textarea.form-control {
   .section-subtitle { font-size: 0.95rem; padding: 0 20px; }
 }
 
-/* Small Mobile */
+/* Small Mobile (480px) */
 @media (max-width: 480px) {
   /* Hero */
   .hero-marquee-content h1 { font-size: 2rem; }
@@ -3048,13 +2928,13 @@ textarea.form-control {
   /* Contact */
   .contact-form-card { padding: 22px 16px 28px 16px !important; }
   .form-group { margin-bottom: 18px; }
-  .form-group input, .form-group select { padding: 10px 14px; font-size: 14px; }
-  .form-group textarea { padding: 10px 14px; font-size: 14px; min-height: 100px; }
-  .form-group label { font-size: 12px; }
-  .btn-submit { padding: 12px 20px; font-size: 14px; }
-  .contact-details div { padding: 12px 14px; gap: 12px; }
+  .form-group input, .form-group select { padding: 10px 14px; font-size: 14px !important; }
+  .form-group textarea { padding: 10px 14px; font-size: 14px; min-height: 100px !important; }
+  .form-group label { font-size: 12px !important; }
+  .btn-submit { padding: 12px 20px; font-size: 14px !important; }
+  .contact-details div { padding: 12px 14px; gap: 12px; flex-flow: wrap; justify-content: center !important; }
   .contact-details div::before { width: 32px; height: 32px; font-size: 14px; line-height: 32px; }
-  .contact-social-link { flex: 1; text-align: center; padding: 10px 16px; font-size: 12px; }
+  .contact-social-link { flex: 1; text-align: center; padding: 10px 16px; font-size: 12px;justify-content: space-around; }
   .success-message::before { width: 56px; height: 56px; font-size: 26px; line-height: 56px; }
   .success-message h3 { font-size: 1.3rem; }
   
@@ -3089,7 +2969,9 @@ textarea.form-control {
   .hero-btn { width: 100%; max-width: 280px; text-align: center; }
 }
 
-/* Extra small devices */
+/* Extra small devices (576px) */
 @media (max-width: 576px) {
   .events-grid { grid-template-columns: 1fr; }
+  .gallery-masonry { column-count: 2; }
+  .album-photos-grid { grid-template-columns: 1fr; }
 }
